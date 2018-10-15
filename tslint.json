@@ -11,6 +11,7 @@
   "rules": {
     "quotemark": [true, "single"],
     "indent": [true, "spaces", 4],
+    "semicolon": [true, "never"],
     "interface-name": false,
     "ordered-imports": false,
     "object-literal-sort-keys": false,
