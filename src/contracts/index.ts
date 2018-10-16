@@ -3,7 +3,7 @@
 import EnergyStationABI from './energy-station.json'
 import EnergyABI from './energy.json'
 
-const EnergyStationAddress = '0xd9552dfB78C07785EB699b4F696F31064ba2a0B7'
+const EnergyStationAddress = '0xE831528A32474Ec04826Cd10df762FB36b83aaFf'
 const EnergyAddress = '0x0000000000000000000000000000456E65726779'
 
 const findFuncInABI = function(name: string, ABIDef: {name: string}[]) {
