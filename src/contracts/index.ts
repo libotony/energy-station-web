@@ -6,7 +6,9 @@ import EnergyABI from './energy.json'
 const EnergyStationAddress = '0xE831528A32474Ec04826Cd10df762FB36b83aaFf'
 const EnergyAddress = '0x0000000000000000000000000000456E65726779'
 
-const findFuncInABI = function(name: string, ABIDef: {name: string}[]) {
+const VETTokenAddress = '0x8F88d6A817C40B1e73A488430EA7F16988Db9067'
+
+const findInABI = function (name: string, ABIDef: {[index: string]: any}[]) {
     const ABI = ABIDef.find((abi) => {
         if (abi.name === name) {
             return true
@@ -24,6 +26,7 @@ export {
     EnergyStationABI,
     EnergyABI,
     EnergyAddress,
+    VETTokenAddress,
     EnergyStationAddress,
-    findFuncInABI
+    findInABI
 }
