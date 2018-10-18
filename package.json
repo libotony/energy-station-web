@@ -19,6 +19,7 @@
     "bignumber.js": "^7.2.1",
     "bootstrap-vue": "^2.0.0-rc.11",
     "typescript": "^3.0.0",
+    "vue-loading-overlay": "^3.0.1",
     "vue-template-compiler": "^2.5.17"
   },
   "postcss": {
