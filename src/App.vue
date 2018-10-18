@@ -15,9 +15,9 @@
             </b-alert>
         </b-row>
     </b-container>
-    <b-container class="pt-5">
+    <b-container class="pt-4">
         <div class="vld-parent">
-            <loading :active="!ready" :is-full-page="false" :color="spinnerColor"></loading>
+            <loading :active="!ready" :is-full-page="false" :color="spinnerColor" :opacity="0.6"></loading>
             <b-row class="mb-2">
                 <b-alert
                     class="w-75 mx-auto"
@@ -30,63 +30,68 @@
                     {{message}}
                 </b-alert>
             </b-row>
-            <b-row class="mb-5">
-                <b-card bg-variant="light" class="w-75 mx-auto" border-variant="primary" title="Latest conversions">
-                    <b-table striped boarderd outlined :items="conversions" :fields="tableFields"></b-table>
+            <b-row class="mb-3">
+                <b-card bg-variant="light" class="w-75 mx-auto" title="EnergyStaion Info">
+                    <b-table stacked small :items="[baseInfo]"></b-table>
                 </b-card>
             </b-row>
-            <b-row class="mb-5">
-                <b-card bg-variant="light" class="w-75 mx-auto">
-                <b-form-group horizontal
-                                breakpoint="lg"
-                                label="VET to VTHO"
-                                label-size="lg"
-                                label-class="font-weight-bold pt-0"
-                                class="mb-0">
-                    <b-form-group horizontal>
-                    <b-input-group prepend="VET">
-                        <b-form-input type="number" v-model="VET2VTHO"></b-form-input>   
-                        <b-input-group-append>
-                        <b-btn text="Button" variant="primary" :disabled="VET2VTHO==='' ||VET2VTHO===0" @click="calcVTHOReturn">Calculate</b-btn>
-                        </b-input-group-append>
-                    </b-input-group> 
-                    </b-form-group>
-                    <b-form-group horizontal>
-                    <b-input-group prepend="VTHO">
-                        <b-form-input v-model="convertedVTHO" readonly></b-form-input>
-                        <b-input-group-append>
-                        <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForVET">Convert</b-btn>
-                        </b-input-group-append>
-                    </b-input-group>
-                    </b-form-group>
-                </b-form-group>
+            <b-row class="mb-3">
+                <b-card bg-variant="light" class="w-75 mx-auto" title="Latest conversions">
+                    <b-table striped boarderd outlined small :items="conversions" :fields="tableFields"></b-table>
                 </b-card>
             </b-row>
-            <b-row>
-                <b-card bg-variant="light" class="w-75 mx-auto">
-                <b-form-group horizontal
-                                breakpoint="lg"
-                                label="VTHO to VET"
-                                label-size="lg"
-                                label-class="font-weight-bold pt-0"
-                                class="mb-0">
-                    <b-form-group horizontal>
-                    <b-input-group prepend="VTHO">
-                        <b-form-input type="number" v-model="VTHO2VET"></b-form-input>   
-                        <b-input-group-append>
-                        <b-btn text="Button" variant="primary" :disabled="VTHO2VET===''||VTHO2VET===0" @click="calcVETReturn">Calculate</b-btn>
-                        </b-input-group-append>
-                    </b-input-group> 
+            <b-row class="mb-3">
+                <b-card bg-variant="light" class="w-75 mx-auto" border-variant="primary">
+                    <b-form-group horizontal
+                                    breakpoint="lg"
+                                    label="VET to VTHO"
+                                    label-size="lg"
+                                    label-class="font-weight-bold pt-0"
+                                    class="mb-0">
+                        <b-form-group horizontal>
+                        <b-input-group prepend="VET">
+                            <b-form-input type="number" v-model="VET2VTHO"></b-form-input>   
+                            <b-input-group-append>
+                            <b-btn text="Button" variant="primary" :disabled="VET2VTHO==='' ||VET2VTHO===0" @click="calcVTHOReturn">Calculate</b-btn>
+                            </b-input-group-append>
+                        </b-input-group> 
+                        </b-form-group>
+                        <b-form-group horizontal>
+                        <b-input-group prepend="VTHO">
+                            <b-form-input v-model="convertedVTHO" readonly></b-form-input>
+                            <b-input-group-append>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForVET">Convert</b-btn>
+                            </b-input-group-append>
+                        </b-input-group>
+                        </b-form-group>
                     </b-form-group>
-                    <b-form-group horizontal>
-                    <b-input-group prepend="VET ">
-                        <b-form-input v-model="convertedVET" readonly></b-form-input>
-                        <b-input-group-append>
-                        <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForEnergy">Convert</b-btn>
-                        </b-input-group-append>
-                    </b-input-group>
+                </b-card>
+            </b-row>
+            <b-row class="mb-3">
+                <b-card bg-variant="light" class="w-75 mx-auto" border-variant="primary" >
+                    <b-form-group horizontal
+                                    breakpoint="lg"
+                                    label="VTHO to VET"
+                                    label-size="lg"
+                                    label-class="font-weight-bold pt-0"
+                                    class="mb-0">
+                        <b-form-group horizontal>
+                        <b-input-group prepend="VTHO">
+                            <b-form-input type="number" v-model="VTHO2VET"></b-form-input>   
+                            <b-input-group-append>
+                            <b-btn text="Button" variant="primary" :disabled="VTHO2VET===''||VTHO2VET===0" @click="calcVETReturn">Calculate</b-btn>
+                            </b-input-group-append>
+                        </b-input-group> 
+                        </b-form-group>
+                        <b-form-group horizontal>
+                        <b-input-group prepend="VET ">
+                            <b-form-input v-model="convertedVET" readonly></b-form-input>
+                            <b-input-group-append>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForEnergy">Convert</b-btn>
+                            </b-input-group-append>
+                        </b-input-group>
+                        </b-form-group>
                     </b-form-group>
-                </b-form-group>
                 </b-card>
             </b-row>
         </div>
@@ -136,14 +141,27 @@ export default class App extends Vue {
     VTHO2VET = 0
     convertedVTHO = "0"
     convertedVET = "0"
+
     dismissCountDown = 0
     message = ''
     alertType = 'primary'
     systemMsg = ''
     showSystemMsg = false
+    sysAlertType = 'primary'
+
     ready = false
     spinnerColor='#007bff'
-    sysAlertType = 'primary'
+
+    baseInfo = {
+        EnergyStationAddress,
+        'VET Balance': '-',
+        'VTHO Balance': '-',
+        'Conversion Fee':'-',
+        Owner: '-'
+    }
+    VETTokenAddress = ''
+
+
     tableFields = {
         conversion:{
             label: 'Conversion'
@@ -162,6 +180,8 @@ export default class App extends Vue {
         }
     }
     conversions: Array<Conversion> = []
+
+
     created() {
         let connex = window.connex
         if (!window.connex) {
@@ -177,9 +197,11 @@ export default class App extends Vue {
             let InitiateFuc = async()=>{
                 await this.getLastConversion()
                 this.ready = true
+                await this.getInitialInfo()
             }
 
-            InitiateFuc().catch(() => {
+            InitiateFuc().catch((e) => {
+                console.log(e)
                 this.showSysMessage("Initiate failed!", 'danger')
             })
         }
@@ -199,12 +221,12 @@ export default class App extends Vue {
     }
     calcVTHOReturn() {
         getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
-            this.convertedVTHO = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'0'))
+            this.convertedVTHO = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
         })
     }
     calcVETReturn() {
         getVETReturn.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
-            this.convertedVET = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'0'))
+            this.convertedVET = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
         })
     }
     convertForVET() {
@@ -212,13 +234,12 @@ export default class App extends Vue {
             const connex = window.connex
 
             const VMOutPut = await getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)])
-            const convertedVET = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'0')))
+            const convertedVET = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
             let minReturn = convertedVET.multipliedBy(0.99)
 
             let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
-            let txID = await connex.vendor.sign("tx", [clause])
-
-            console.log(txID)
+            let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
+            this.showMessage(`Success! TXID: ${ret.txId} signed by: ${ret.signer}`, 'success')
         })().catch(e => {
             this.showMessage('Convet failed caused by: '+e.message)
         })
@@ -229,14 +250,14 @@ export default class App extends Vue {
 
             const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
             const VMOutPut = await getEnergyReturn.call([amount.toString(10)])
-            const convertedEnergy = new BigNumber(this.exactValueFromDeocded(VMOutPut ,'0'))
+            const convertedEnergy = new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
             let minReturn = convertedEnergy.multipliedBy(0.99)
 
             let approveClause = enerngyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
             let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
 
             let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
-            console.log(ret)
+            this.showMessage(`Success! TXID: ${ret.txId} signed by: ${ret.signer}`, 'success')
         })().catch(e => {
             this.showMessage('Convet failed caused by: '+e.message)
         })
@@ -262,6 +283,19 @@ export default class App extends Vue {
         }
         this.conversions = conversions
     
+    }
+    async getInitialInfo(){
+        let connex = window.connex;
+        let ret = await connex.thor.account(EnergyStationAddress).method(findInABI("vetToken", EnergyStationABI)).call([])
+        this.VETTokenAddress = this.exactValueFromDeocded(ret, '0')
+        ret = await connex.thor.account(this.VETTokenAddress).method(findInABI("balanceOf", EnergyABI)).call([EnergyStationAddress])
+        this.baseInfo['VET Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
+        ret = await connex.thor.account(EnergyAddress).method(findInABI("balanceOf", EnergyABI)).call([EnergyStationAddress])
+        this.baseInfo['VTHO Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
+        ret = await connex.thor.account(EnergyStationAddress).method(findInABI("conversionFee", EnergyStationABI)).call([])
+        this.baseInfo['Conversion Fee'] = this.exactValueFromDeocded(ret, '0')/10000 + '%'
+        ret = await connex.thor.account(EnergyStationAddress).method(findInABI("owner", EnergyStationABI)).call([])
+        this.baseInfo['Owner'] = this.exactValueFromDeocded(ret, '0')
     }
 
 
