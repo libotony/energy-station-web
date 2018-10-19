@@ -44,17 +44,14 @@
                 <b-card bg-variant="light" class="w-75 mx-auto" border-variant="primary">
                     <b-form-group horizontal
                                     breakpoint="lg"
-                                    label="VET to VTHO"
+                                    label="VET ⇒ VTHO"
                                     label-size="lg"
                                     label-class="font-weight-bold pt-0"
                                     class="mb-0">
                         <b-form-group horizontal>
-                        <b-input-group prepend="VET">
-                            <b-form-input type="number" v-model="VET2VTHO" @input="calcVTHOReturn"></b-form-input>   
-                            <!-- <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="VET2VTHO==='' ||VET2VTHO===0" @click="calcVTHOReturn">Calculate</b-btn>
-                            </b-input-group-append> -->
-                        </b-input-group> 
+                            <b-input-group>
+                                <b-form-input type="number" v-model="VET2VTHO" @input="calcVTHOReturn"></b-form-input>   
+                            </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
                         <b-input-group prepend="VTHO">
@@ -71,20 +68,17 @@
                 <b-card bg-variant="light" class="w-75 mx-auto" border-variant="primary" >
                     <b-form-group horizontal
                                     breakpoint="lg"
-                                    label="VTHO to VET"
+                                    label="VTHO ⇒ VET"
                                     label-size="lg"
                                     label-class="font-weight-bold pt-0"
                                     class="mb-0">
                         <b-form-group horizontal>
-                        <b-input-group prepend="VTHO">
-                            <b-form-input type="number" v-model="VTHO2VET" @input="calcVETReturn"></b-form-input>   
-                            <!-- <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="VTHO2VET===''||VTHO2VET===0" @click="calcVETReturn">Calculate</b-btn>
-                            </b-input-group-append> -->
-                        </b-input-group> 
+                            <b-input-group>
+                                <b-form-input type="number" v-model="VTHO2VET" @input="calcVETReturn"></b-form-input>   
+                            </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
-                        <b-input-group prepend="VET ">
+                        <b-input-group prepend="VET">
                             <b-form-input v-model="convertedVET" readonly></b-form-input>
                             <b-input-group-append>
                             <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForEnergy">Convert</b-btn>
@@ -280,11 +274,11 @@ export default class App extends Vue {
         for(let log of logs){
             let item:Conversion = {}
             if((log.decoded as decodedReturn)['_fromToken'] === EnergyAddress){
-                item.conversion = "VTHO->VET"
+                item.conversion = "VTHO→VET"
                 item.rate = new BigNumber(this.exactValueFromDeocded(log ,'_sellAmount')).dividedBy(this.exactValueFromDeocded(log ,'_return')).dp(4).toString(10)
                 item.fee = this.fromWeitoDisplayValue(this.exactValueFromDeocded(log ,'_conversionFee'))  + 'VET'
             }else{
-                item.conversion = "VET->VTHO"
+                item.conversion = "VET→VTHO"
                 item.rate = new BigNumber(this.exactValueFromDeocded(log ,'_return')).dividedBy(this.exactValueFromDeocded(log ,'_sellAmount')).dp(4).toString(10)
                 item.fee = this.fromWeitoDisplayValue(this.exactValueFromDeocded(log ,'_conversionFee'))  + 'VTHO'
             }
