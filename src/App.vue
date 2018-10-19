@@ -50,10 +50,10 @@
                                     class="mb-0">
                         <b-form-group horizontal>
                         <b-input-group prepend="VET">
-                            <b-form-input type="number" v-model="VET2VTHO"></b-form-input>   
-                            <b-input-group-append>
+                            <b-form-input type="number" v-model="VET2VTHO" @input="calcVTHOReturn"></b-form-input>   
+                            <!-- <b-input-group-append>
                             <b-btn text="Button" variant="primary" :disabled="VET2VTHO==='' ||VET2VTHO===0" @click="calcVTHOReturn">Calculate</b-btn>
-                            </b-input-group-append>
+                            </b-input-group-append> -->
                         </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
@@ -77,10 +77,10 @@
                                     class="mb-0">
                         <b-form-group horizontal>
                         <b-input-group prepend="VTHO">
-                            <b-form-input type="number" v-model="VTHO2VET"></b-form-input>   
-                            <b-input-group-append>
+                            <b-form-input type="number" v-model="VTHO2VET" @input="calcVETReturn"></b-form-input>   
+                            <!-- <b-input-group-append>
                             <b-btn text="Button" variant="primary" :disabled="VTHO2VET===''||VTHO2VET===0" @click="calcVETReturn">Calculate</b-btn>
-                            </b-input-group-append>
+                            </b-input-group-append> -->
                         </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
@@ -103,6 +103,7 @@
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import { Component, Vue, Watch } from "vue-property-decorator"
+import debounce from 'lodash.debounce'
 import { BigNumber } from "bignumber.js"
 import {
     EnergyStationABI,
@@ -156,7 +157,7 @@ export default class App extends Vue {
         EnergyStationAddress,
         'VET Balance': '-',
         'VTHO Balance': '-',
-        'Conversion Fee':'-',
+        'Conversion Rate':'-',
         Owner: '-'
     }
     VETTokenAddress = ''
@@ -219,12 +220,22 @@ export default class App extends Vue {
         this.systemMsg = msg
         this.showSystemMsg = true
     }
-    calcVTHOReturn() {
+    calcVTHOReturn = debounce(this.getVTHOReturn, 200)
+    calcVETReturn = debounce(this.getVETReturn, 200)
+    getVTHOReturn() {
+        if(!this.VET2VTHO){
+            this.convertedVTHO = '0'
+            return
+        }
         getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
             this.convertedVTHO = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
         })
     }
-    calcVETReturn() {
+    getVETReturn() {
+        if(!this.VTHO2VET){
+            this.convertedVET = '0'
+            return
+        }
         getVETReturn.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
             this.convertedVET = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
         })
@@ -281,7 +292,7 @@ export default class App extends Vue {
             item.converted = this.fromWeitoDisplayValue(this.exactValueFromDeocded(log ,'_return'))
             conversions.push(item)
         }
-        this.conversions = conversions
+        this.conversions = conversions.reverse()
     
     }
     async getInitialInfo(){
@@ -293,7 +304,7 @@ export default class App extends Vue {
         ret = await connex.thor.account(EnergyAddress).method(findInABI("balanceOf", EnergyABI)).call([EnergyStationAddress])
         this.baseInfo['VTHO Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
         ret = await connex.thor.account(EnergyStationAddress).method(findInABI("conversionFee", EnergyStationABI)).call([])
-        this.baseInfo['Conversion Fee'] = this.exactValueFromDeocded(ret, '0')/10000 + '%'
+        this.baseInfo['Conversion Rate'] = this.exactValueFromDeocded(ret, '0')/10000 + '%'
         ret = await connex.thor.account(EnergyStationAddress).method(findInABI("owner", EnergyStationABI)).call([])
         this.baseInfo['Owner'] = this.exactValueFromDeocded(ret, '0')
     }
