@@ -18,18 +18,6 @@
     <b-container class="pt-4">
         <div class="vld-parent">
             <loading :active="!ready" :is-full-page="false" :color="spinnerColor" :opacity="0.6"></loading>
-            <b-row class="mb-2">
-                <b-alert
-                    class="w-75 mx-auto"
-                    :variant="alertType"
-                    :show="dismissCountDown" 
-                    dismissible 
-                    fade
-                    @dismissed="dismissCountDown=0"
-                    @dismiss-count-down="countDownChanged">
-                    {{message}}
-                </b-alert>
-            </b-row>
             <b-row class="mb-3">
                 <b-card bg-variant="light" class="w-75 mx-auto" title="EnergyStaion Info">
                     <b-table stacked small :items="[baseInfo]"></b-table>
@@ -90,6 +78,13 @@
             </b-row>
         </div>
     </b-container>
+    <b-modal v-model="showModal" centered hide-header hide-footer :body-text-variant="modalType">
+        <div class="d-block text-center">
+            <p style="word-wrap:break-word;" v-html="modalMsg">
+            </p>
+        </div>
+        <b-btn class="mt-3" block :variant="'outline-'+modalType" @click="showModal=false">OK</b-btn>
+    </b-modal>
   </div>
 </template>
 
@@ -137,9 +132,6 @@ export default class App extends Vue {
     convertedVTHO = "0"
     convertedVET = "0"
 
-    dismissCountDown = 0
-    message = ''
-    alertType = 'primary'
     systemMsg = ''
     showSystemMsg = false
     sysAlertType = 'primary'
@@ -156,6 +148,9 @@ export default class App extends Vue {
     }
     VETTokenAddress = ''
 
+    showModal=false
+    modalMsg = ''
+    modalType='success'
 
     tableFields = {
         conversion:{
@@ -201,14 +196,12 @@ export default class App extends Vue {
             })
         }
     }
-    countDownChanged(dismissCountDown:number) {
-        this.dismissCountDown = dismissCountDown
+    showModalMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
+        this.modalType = type
+        this.modalMsg = msg
+        this.showModal = true
     }
-    showMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
-        this.alertType = type
-        this.message = msg
-        this.dismissCountDown = 5
-    }
+
     showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
         this.sysAlertType = type
         this.systemMsg = msg
@@ -244,9 +237,9 @@ export default class App extends Vue {
 
             let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
             let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
-            this.showMessage(`Success! TXID: ${ret.txId} signed by: ${ret.signer}`, 'success')
+            this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
         })().catch(e => {
-            this.showMessage('Convet failed caused by: '+e.message)
+            this.showModalMessage('Convet failed caused by: '+e.message)
         })
     }
     convertForEnergy() {
@@ -262,9 +255,9 @@ export default class App extends Vue {
             let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
 
             let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
-            this.showMessage(`Success! TXID: ${ret.txId} signed by: ${ret.signer}`, 'success')
+            this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
         })().catch(e => {
-            this.showMessage('Convet failed caused by: '+e.message)
+            this.showModalMessage('Convet failed caused by: '+e.message)
         })
     }
     async getLastConversion(){
