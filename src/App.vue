@@ -25,7 +25,7 @@
             </b-row>
             <b-row class="mb-3">
                 <b-card bg-variant="light" class="w-75 mx-auto" title="Latest conversions">
-                    <b-table striped boarderd outlined small :items="conversions" :fields="tableFields"></b-table>
+                    <b-table striped boarderd outlined small responsive :items="conversions" :fields="tableFields"></b-table>
                 </b-card>
             </b-row>
             <b-row class="mb-3">
