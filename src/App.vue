@@ -20,7 +20,7 @@
             <loading :active="!ready" :is-full-page="false" :color="spinnerColor" :opacity="0.6"></loading>
             <b-row class="mb-3">
                 <b-card bg-variant="light" class="w-75 mx-auto" title="EnergyStaion Info">
-                    <b-table stacked small :items="[baseInfo]"></b-table>
+                    <b-table stacked small :items="[baseInfo]" class="w-100 info"></b-table>
                 </b-card>
             </b-row>
             <b-row class="mb-3">
@@ -307,4 +307,9 @@ export default class App extends Vue {
 </script>
 
 <style>
+.info tr div{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 </style>
