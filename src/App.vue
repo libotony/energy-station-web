@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <b-navbar class="navbar navbar-dark bg-primary">
-      <b-navbar-brand>EnergyStation</b-navbar-brand>
+        <b-navbar-brand>EnergyStation</b-navbar-brand>
     </b-navbar>
     <b-container class="pt-2">
         <b-row class="mb-2">

@@ -1,6 +1,14 @@
-# energy-station-web
+# EnergyStation web
 
-## Project setup
+Web page works with energy station contracts
+
+## Contracts and detail
+
+[EnergyStation](https://github.com/libotony/energy-station)
+
+## Development
+
+### Project setup
 ```
 npm install
 ```
