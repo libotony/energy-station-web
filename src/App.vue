@@ -45,7 +45,7 @@
                         <b-input-group prepend="VTHO">
                             <b-form-input v-model="convertedVTHO" readonly></b-form-input>
                             <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForVET">Convert</b-btn>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForEnergy">Convert</b-btn>
                             </b-input-group-append>
                         </b-input-group>
                         </b-form-group>
@@ -69,7 +69,7 @@
                         <b-input-group prepend="VET">
                             <b-form-input v-model="convertedVET" readonly></b-form-input>
                             <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForEnergy">Convert</b-btn>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForVET">Convert</b-btn>
                             </b-input-group-append>
                         </b-input-group>
                         </b-form-group>
@@ -227,29 +227,29 @@ export default class App extends Vue {
             this.convertedVET = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
         })
     }
-    convertForVET() {
+    convertForEnergy() {
         (async () => {
             const connex = window.connex
 
             const VMOutPut = await getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)])
-            const convertedVET = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
-            let minReturn = convertedVET.multipliedBy(0.99)
+            const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
+            let minReturn = convertedEnergy.multipliedBy(0.99)
 
-            let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
+            let clause = convertForVET.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
             let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
             this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
         })().catch(e => {
             this.showModalMessage('Convet failed caused by: '+e.message)
         })
     }
-    convertForEnergy() {
+    convertForVET() {
         (async () => {
             const connex = window.connex
 
             const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
-            const VMOutPut = await getEnergyReturn.call([amount.toString(10)])
-            const convertedEnergy = new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
-            let minReturn = convertedEnergy.multipliedBy(0.99)
+            const VMOutPut = await getVETReturn.call([amount.toString(10)])
+            const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
+            let minReturn = convertedVET.multipliedBy(0.99)
 
             let approveClause = enerngyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
             let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
