@@ -106,7 +106,7 @@ let getEnergyReturn: Connex.Thor.Method
 let getVETReturn: Connex.Thor.Method
 let convertForEnergy: Connex.Thor.Method
 let convertForVET: Connex.Thor.Method
-let enerngyApprove: Connex.Thor.Method
+let energyApprove: Connex.Thor.Method
 let conversionEvent: Connex.Thor.EventVisitor
 
 interface decodedReturn {
@@ -181,7 +181,7 @@ export default class App extends Vue {
             getVETReturn = connex.thor.account(EnergyStationAddress).method(findInABI("getVETReturn", EnergyStationABI))
             convertForEnergy = connex.thor.account(EnergyStationAddress).method(findInABI("convertForEnergy", EnergyStationABI))
             convertForVET = connex.thor.account(EnergyStationAddress).method(findInABI("convertForVET", EnergyStationABI))
-            enerngyApprove = connex.thor.account(EnergyAddress).method(findInABI("approve", EnergyABI))
+            energyApprove = connex.thor.account(EnergyAddress).method(findInABI("approve", EnergyABI))
             conversionEvent = connex.thor.account(EnergyStationAddress).event(findInABI("Conversion", EnergyStationABI))
 
             let InitiateFuc = async()=>{
@@ -235,7 +235,7 @@ export default class App extends Vue {
             const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
             let minReturn = convertedEnergy.multipliedBy(0.99)
 
-            let clause = convertForVET.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
+            let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
             let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
             this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
         })().catch(e => {
@@ -251,7 +251,7 @@ export default class App extends Vue {
             const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
             let minReturn = convertedVET.multipliedBy(0.99)
 
-            let approveClause = enerngyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
+            let approveClause = energyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
             let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
 
             let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
