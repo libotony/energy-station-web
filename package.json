@@ -13,6 +13,9 @@
     "vue-property-decorator": "^7.0.0"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.8",
+    "@fortawesome/free-solid-svg-icons": "^5.5.0",
+    "@fortawesome/vue-fontawesome": "^0.1.2",
     "@types/lodash.debounce": "^4.0.4",
     "@types/node": "^10.11.7",
     "@vue/cli-plugin-typescript": "^3.0.5",
