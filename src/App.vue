@@ -38,11 +38,11 @@
                                     class="mb-0">
                         <b-form-group horizontal>
                             <b-input-group>
-                                <b-form-input type="number" v-model="VET2VTHO" @input="calcVTHOReturn"></b-form-input>   
+                                <b-form-input type="number" v-model="VET2VTHO" :formatter="formatUnsigedInt" @input="calcVTHOReturn"></b-form-input>
                             </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
-                        <b-input-group prepend="VTHO">
+                        <b-input-group prepend="est. VTHO">
                             <b-form-input v-model="convertedVTHO" readonly></b-form-input>
                             <b-input-group-append>
                             <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForEnergy">Convert</b-btn>
@@ -62,11 +62,11 @@
                                     class="mb-0">
                         <b-form-group horizontal>
                             <b-input-group>
-                                <b-form-input type="number" v-model="VTHO2VET" @input="calcVETReturn"></b-form-input>   
+                                <b-form-input type="number" v-model="VTHO2VET" :formatter="formatUnsigedInt" @input="calcVETReturn"></b-form-input>   
                             </b-input-group> 
                         </b-form-group>
                         <b-form-group horizontal>
-                        <b-input-group prepend="VET">
+                        <b-input-group prepend="est. VET">
                             <b-form-input v-model="convertedVET" readonly></b-form-input>
                             <b-input-group-append>
                             <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForVET">Convert</b-btn>
@@ -78,12 +78,56 @@
             </b-row>
         </div>
     </b-container>
-    <b-modal v-model="showModal" centered hide-header hide-footer :body-text-variant="modalType">
-        <div class="d-block text-center">
-            <p style="word-wrap:break-word;" v-html="modalMsg">
-            </p>
-        </div>
-        <b-btn class="mt-3" block :variant="'outline-'+modalType" @click="showModal=false">OK</b-btn>
+    <b-modal v-model="showModal" 
+        title="Convert Tokens" 
+        header-bg-variant="primary" 
+        header-text-variant="light"
+        hide-header-close
+        centered>
+        <b-container fluid class="mt-3"> 
+            <b-row class="text-center" align-v="center">
+                <b-col><p><span style="font-size:1.5rem">{{fromTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{fromTokenType}}</span></p></b-col>
+                <b-col><p style="font-size:3rem">⇒</p></b-col>
+                <b-col><p><span style="font-size:1.5rem">{{toTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{toTokenType}}</span></p></b-col>
+            </b-row>
+            <b-row>
+                <b-col>
+                    <p style="font-size:0.75rem" class="d-flex justify-content-end"><span class="text-muted">Rate:&nbsp;</span><span class="">1 {{toTokenType}}={{convertRate}} {{fromTokenType}}</span></p>
+                </b-col>
+            </b-row>
+        </b-container>
+        <b-container fluid>
+            <b-row>
+                <b-card class="w-100">
+                    <b-container fluid> 
+                        <b-row align-h="between" @click="showAdvanced=!showAdvanced">
+                            <b-col class="d-flex justify-content-start text-muted">ADVANCED SEETINGS</b-col>
+                            <b-col class="d-flex justify-content-end text-muted"><fa-i :icon="showAdvanced?'angle-double-up':'angle-double-down'" size="lg"></fa-i></b-col>
+                        </b-row>
+                        <b-row>
+                            <b-col>
+                                <b-collapse v-model="showAdvanced" id="advanced">
+                                    <b-form-group class="mt-3" label="PRICE LIMIT" label-size="sm" label-class="text-muted" >
+                                        <b-input-group size="sm" :append="fromTokenType">
+                                            <b-form-input v-model="priceLimit" readonly></b-form-input>
+                                        </b-input-group>
+                                    </b-form-group>
+                                    <b-form-group class="mt-3" label="PRICE CHANGE" label-size="sm" label-class="text-muted" >
+                                        <b-input-group size="sm" append="%">
+                                            <b-form-input v-model="priceLoss" type="number" :formatter="formatPercentage" @input="calcPriceLimit"></b-form-input>
+                                        </b-input-group>
+                                    </b-form-group>
+                                    <b-form-group label-class="text-muted" label="NO VTHO APPROVE CLAUSE" v-show="showNoApproveOption">
+                                        <b-form-checkbox v-model="noApprove"><span class="text-muted">I have appoved enough amount before this.</span></b-form-checkbox>
+                                    </b-form-group>
+                                </b-collapse>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+                </b-card>
+            </b-row>
+        </b-container>
+        <b-btn slot="modal-footer" block variant="primary" size="lg" @click="showModal=false">OK</b-btn>
     </b-modal>
   </div>
 </template>
@@ -95,19 +139,12 @@ import { Component, Vue, Watch } from "vue-property-decorator"
 import debounce from 'lodash.debounce'
 import { BigNumber } from "bignumber.js"
 import {
-    EnergyStationABI,
     EnergyStationAddress,
-    EnergyABI,
-    EnergyAddress,
-    findInABI
+    methodOfEnergyStation,
+    eventOfEnergyStation,
+    methodOfEnergy,
+    eventOfEnergy
 } from "./contracts"
-
-let getEnergyReturn: Connex.Thor.Method
-let getVETReturn: Connex.Thor.Method
-let convertForEnergy: Connex.Thor.Method
-let convertForVET: Connex.Thor.Method
-let energyApprove: Connex.Thor.Method
-let conversionEvent: Connex.Thor.EventVisitor
 
 interface decodedReturn {
     [index: string]: any
@@ -119,6 +156,12 @@ interface Conversion{
     rate?: string;
     fee?: string;
 }
+enum ConversionType{
+    ToVET,
+    ToVTHO
+}
+
+const MIN_PRICE_LOSS = 2
 
 @Component({
     components:{
@@ -127,18 +170,14 @@ interface Conversion{
 })
 
 export default class App extends Vue {
-    VET2VTHO = 0
-    VTHO2VET = 0
-    convertedVTHO = "0"
-    convertedVET = "0"
-
+    // app level message
     systemMsg = ''
     showSystemMsg = false
     sysAlertType = 'primary'
-
+    // initiate state
     ready = false
     spinnerColor='#007bff'
-
+    // base info 
     baseInfo = {
         EnergyStationAddress,
         'VET Balance': '-',
@@ -146,12 +185,7 @@ export default class App extends Vue {
         'Conversion Rate':'-',
         Owner: '-'
     }
-    VETTokenAddress = ''
-
-    showModal=false
-    modalMsg = ''
-    modalType='success'
-
+    // last conversions
     tableFields = {
         conversion:{
             label: 'Conversion'
@@ -170,103 +204,121 @@ export default class App extends Vue {
         }
     }
     conversions: Array<Conversion> = []
-
+    // conversion cards
+    VET2VTHO = '0'
+    VTHO2VET = '0'
+    convertedVTHO = '0'
+    convertedVET = '0'
+    calcedVTHO = new BigNumber(0)
+    calcedVET = new BigNumber(0)
+    // conversion popup modal
+    showModal=false
+    conversionType:ConversionType = ConversionType.ToVTHO
+    fromTokenValue = '0'
+    toTokenValue = '0'
+    showAdvanced = false
+    priceLoss = 2
+    priceLimit = '0'
+    showNoApproveOption = false
+    noApprove = false
 
     created() {
-        let connex = window.connex
         if (!window.connex) {
             this.showSysMessage("No connex environment detacted, please download sync!", 'danger')
         } else {
-            getEnergyReturn = connex.thor.account(EnergyStationAddress).method(findInABI("getEnergyReturn", EnergyStationABI))
-            getVETReturn = connex.thor.account(EnergyStationAddress).method(findInABI("getVETReturn", EnergyStationABI))
-            convertForEnergy = connex.thor.account(EnergyStationAddress).method(findInABI("convertForEnergy", EnergyStationABI))
-            convertForVET = connex.thor.account(EnergyStationAddress).method(findInABI("convertForVET", EnergyStationABI))
-            energyApprove = connex.thor.account(EnergyAddress).method(findInABI("approve", EnergyABI))
-            conversionEvent = connex.thor.account(EnergyStationAddress).event(findInABI("Conversion", EnergyStationABI))
-
             let InitiateFuc = async()=>{
-                await this.getLastConversion()
+                await Promise.all([this.getInitialInfo(), this.getLastConversion()])
                 this.ready = true
-                await this.getInitialInfo()
             }
-
             InitiateFuc().catch((e) => {
                 console.log(e)
                 this.showSysMessage("Initiate failed!", 'danger')
             })
         }
     }
-    showModalMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
-        this.modalType = type
-        this.modalMsg = msg
-        this.showModal = true
-    }
+
+    // showModalMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
+    //     this.modalType = type
+    //     this.modalMsg = msg
+    //     this.showModal = true
+    // }
 
     showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
         this.sysAlertType = type
         this.systemMsg = msg
         this.showSystemMsg = true
     }
+
     calcVTHOReturn = debounce(this.getVTHOReturn, 200)
     calcVETReturn = debounce(this.getVETReturn, 200)
+
     getVTHOReturn() {
-        if(!this.VET2VTHO){
+        if(!this.VET2VTHO || isNaN(parseInt(this.VET2VTHO)) || parseInt(this.VET2VTHO)=== 0 ){
             this.convertedVTHO = '0'
             return
         }
-        getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
-            this.convertedVTHO = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
+        methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)]).then(VMOutPut => {
+            this.calcedVTHO  = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
+            this.convertedVTHO = this.fromWeitoDisplayValue(this.calcedVTHO)
         })
     }
     getVETReturn() {
-        if(!this.VTHO2VET){
+        if(!this.VTHO2VET || isNaN(parseInt(this.VTHO2VET)) || parseInt(this.VTHO2VET)=== 0){
             this.convertedVET = '0'
             return
         }
-        getVETReturn.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)]).then(output => {
-            this.convertedVET = this.fromWeitoDisplayValue(this.exactValueFromDeocded(output ,'canAcquire'))
+        methodOfEnergyStation('getVETReturn')!.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)]).then(VMOutPut => {
+            this.calcedVET  = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
+            this.convertedVET = this.fromWeitoDisplayValue(this.calcedVET)
         })
     }
     convertForEnergy() {
-        (async () => {
-            const connex = window.connex
+        this.showModal = true
+        this.initConvertModal(ConversionType.ToVTHO)
+ 
+        // (async () => {
+        //     const connex = window.connex
 
-            const VMOutPut = await getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)])
-            const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
-            let minReturn = convertedEnergy.multipliedBy(0.99)
+        //     const VMOutPut = await getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)])
+        //     const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
+        //     let minReturn = convertedEnergy.multipliedBy(0.99)
 
-            let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
-            let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
-            this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
-        })().catch(e => {
-            this.showModalMessage('Convet failed caused by: '+e.message)
-        })
+        //     let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
+        //     let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
+        //     this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
+        // })().catch(e => {
+        //     this.showModalMessage('Convet failed caused by: '+e.message)
+        // })
     }
     convertForVET() {
-        (async () => {
-            const connex = window.connex
+        this.showModal = true
+        this.initConvertModal(ConversionType.ToVET)
 
-            const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
-            const VMOutPut = await getVETReturn.call([amount.toString(10)])
-            const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
-            let minReturn = convertedVET.multipliedBy(0.99)
 
-            let approveClause = energyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
-            let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
+        // (async () => {
+        //     const connex = window.connex
 
-            let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
-            this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
-        })().catch(e => {
-            this.showModalMessage('Convet failed caused by: '+e.message)
-        })
+        //     const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
+        //     const VMOutPut = await getVETReturn.call([amount.toString(10)])
+        //     const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
+        //     let minReturn = convertedVET.multipliedBy(0.99)
+
+        //     let approveClause = energyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
+        //     let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
+
+        //     let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
+        //     this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
+        // })().catch(e => {
+        //     this.showModalMessage('Convet failed caused by: '+e.message)
+        // })
     }
     async getLastConversion(){
 
-        let logs = await conversionEvent.filter([]).order("desc").next(0,5)
+        let logs = await eventOfEnergyStation('Conversion')!.filter([]).order("desc").next(0,5)
         let conversions:Array<Conversion>= []
         for(let log of logs){
             let item:Conversion = {}
-            if((log.decoded as decodedReturn)['_fromToken'] === EnergyAddress){
+            if((log.decoded as decodedReturn)['tradeType'] == '1'){
                 item.conversion = "VTHO→VET"
                 item.rate = new BigNumber(this.exactValueFromDeocded(log ,'_sellAmount')).dividedBy(this.exactValueFromDeocded(log ,'_return')).dp(4).toString(10)
                 item.fee = this.fromWeitoDisplayValue(this.exactValueFromDeocded(log ,'_conversionFee'))  + 'VET'
@@ -284,24 +336,94 @@ export default class App extends Vue {
     }
     async getInitialInfo(){
         let connex = window.connex;
-        let ret = await connex.thor.account(EnergyStationAddress).method(findInABI("vetToken", EnergyStationABI)).call([])
-        this.VETTokenAddress = this.exactValueFromDeocded(ret, '0')
-        ret = await connex.thor.account(this.VETTokenAddress).method(findInABI("balanceOf", EnergyABI)).call([EnergyStationAddress])
+        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([])
         this.baseInfo['VET Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
-        ret = await connex.thor.account(EnergyAddress).method(findInABI("balanceOf", EnergyABI)).call([EnergyStationAddress])
+        ret = await methodOfEnergyStation('energyVirtualBalance')!.call([])        
         this.baseInfo['VTHO Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
-        ret = await connex.thor.account(EnergyStationAddress).method(findInABI("conversionFee", EnergyStationABI)).call([])
+        ret = await methodOfEnergyStation('conversionFee')!.call([])
         this.baseInfo['Conversion Rate'] = this.exactValueFromDeocded(ret, '0')/10000 + '%'
-        ret = await connex.thor.account(EnergyStationAddress).method(findInABI("owner", EnergyStationABI)).call([])
+        ret = await methodOfEnergyStation('owner')!.call([])  
         this.baseInfo['Owner'] = this.exactValueFromDeocded(ret, '0')
     }
-
-
     fromWeitoDisplayValue(input: any){
         return new BigNumber(input).dividedBy(1e18).dp(4).toString(10)
     }
     exactValueFromDeocded(output: Connex.Thor.Decoded, key:string){
         return (output.decoded as decodedReturn)[key]
+    }
+    formatUnsigedInt(input: string){
+        if(!isNaN(parseInt(input)) && parseInt(input)>= 0){
+            return parseInt(input)
+        }else{
+            return '0'
+        }
+    }
+    formatPercentage(input: string){
+        if(!isNaN(parseInt(input)) && parseInt(input)>= MIN_PRICE_LOSS){
+            if(parseInt(input)>100){
+                return 100
+            }
+            return parseInt(input)
+        }else{
+            return MIN_PRICE_LOSS
+        }
+    }
+    calcPriceLimit = debounce(this.getPriceLimit, 200)
+    getPriceLimit(){
+        if(this.conversionType === ConversionType.ToVTHO){
+            this.priceLimit = new BigNumber(this.VET2VTHO).multipliedBy(1e18).dividedBy(this.calcedVTHO).multipliedBy(1+this.priceLoss/100).dp(6).toString(10)
+        }else{
+            this.priceLimit = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dividedBy(this.calcedVET).multipliedBy(1+this.priceLoss/100).dp(6).toString(10)
+        }
+    }
+    initConvertModal(conversionType: ConversionType){
+        this.conversionType = conversionType
+        if(conversionType === ConversionType.ToVET){
+            this.fromTokenValue = this.VTHO2VET
+            this.toTokenValue = this.convertedVET
+        }else{
+            this.fromTokenValue = this.VTHO2VET
+            this.toTokenValue = this.convertedVET
+        }
+        this.getPriceLimit()
+        this.priceLoss = 2
+        this.showNoApproveOption = false
+        this.noApprove = true
+    }
+    async checkApproval(){
+        if(this.conversionType !== ConversionType.ToVTHO){
+            return
+        }
+        // TODO: need sync to implement link account
+        let spender = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed'
+        let ret = await methodOfEnergy('allowance')!.call([],)
+        const remaining  =  this.exactValueFromDeocded(ret, 'remaining')
+        if(new BigNumber(remaining).dividedBy(1e18).isGreaterThanOrEqualTo(this.VET2VTHO)){
+            this.showNoApproveOption = true
+        }else{
+            this.showNoApproveOption = false
+        }
+    }
+    get fromTokenType(){
+        if(this.conversionType === ConversionType.ToVET){
+            return 'VTHO'
+        }else{
+            return 'VET'
+        }
+    }
+    get toTokenType(){
+        if(this.conversionType === ConversionType.ToVTHO){
+            return 'VTHO'
+        }else{
+            return 'VET'
+        }
+    }
+    get convertRate(){
+        if(this.conversionType === ConversionType.ToVTHO){
+            return new BigNumber(this.VET2VTHO).multipliedBy(1e18).dividedBy(this.calcedVTHO).dp(6).toString(10)
+        }else{
+            return new BigNumber(this.VTHO2VET).multipliedBy(1e18).dividedBy(this.calcedVET).dp(6).toString(10)
+        }
     }
 }
 </script>
@@ -311,5 +433,8 @@ export default class App extends Vue {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.advanced{
+    font-size: 0.75rem
 }
 </style>
