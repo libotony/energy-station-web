@@ -45,7 +45,7 @@
                         <b-input-group prepend="est. VTHO">
                             <b-form-input v-model="convertedVTHO" readonly></b-form-input>
                             <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="convertForEnergy">Convert</b-btn>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVTHO==0" @click="proceedForEnergy">Convert</b-btn>
                             </b-input-group-append>
                         </b-input-group>
                         </b-form-group>
@@ -69,7 +69,7 @@
                         <b-input-group prepend="est. VET">
                             <b-form-input v-model="convertedVET" readonly></b-form-input>
                             <b-input-group-append>
-                            <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="convertForVET">Convert</b-btn>
+                            <b-btn text="Button" variant="primary" :disabled="convertedVET==0" @click="proceedForVET">Convert</b-btn>
                             </b-input-group-append>
                         </b-input-group>
                         </b-form-group>
@@ -127,7 +127,7 @@
                 </b-card>
             </b-row>
         </b-container>
-        <b-btn slot="modal-footer" block variant="primary" size="lg" @click="showModal=false">OK</b-btn>
+        <b-btn slot="modal-footer" block variant="primary" size="lg" @click="doConvert" :disabled="converting"><fa-i icon="circle-notch" spin v-show="converting"></fa-i>{{converting?'&nbsp;&nbsp;Processing':'OK'}}</b-btn>
     </b-modal>
   </div>
 </template>
@@ -221,6 +221,7 @@ export default class App extends Vue {
     priceLimit = '0'
     showNoApproveOption = false
     noApprove = false
+    converting=false
 
     created() {
         if (!window.connex) {
@@ -257,7 +258,7 @@ export default class App extends Vue {
             this.convertedVTHO = '0'
             return
         }
-        methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)]).then(VMOutPut => {
+        methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)],'0x0').then(VMOutPut => {
             this.calcedVTHO  = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
             this.convertedVTHO = this.fromWeitoDisplayValue(this.calcedVTHO)
         })
@@ -267,12 +268,12 @@ export default class App extends Vue {
             this.convertedVET = '0'
             return
         }
-        methodOfEnergyStation('getVETReturn')!.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)]).then(VMOutPut => {
+        methodOfEnergyStation('getVETReturn')!.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)], '0x0').then(VMOutPut => {
             this.calcedVET  = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
             this.convertedVET = this.fromWeitoDisplayValue(this.calcedVET)
         })
     }
-    convertForEnergy() {
+    proceedForEnergy() {
         this.showModal = true
         this.initConvertModal(ConversionType.ToVTHO)
  
@@ -290,10 +291,10 @@ export default class App extends Vue {
         //     this.showModalMessage('Convet failed caused by: '+e.message)
         // })
     }
-    convertForVET() {
+    proceedForVET() {
         this.showModal = true
         this.initConvertModal(ConversionType.ToVET)
-
+        this.checkApproval()
 
         // (async () => {
         //     const connex = window.connex
@@ -311,6 +312,43 @@ export default class App extends Vue {
         // })().catch(e => {
         //     this.showModalMessage('Convet failed caused by: '+e.message)
         // })
+    }
+    doConvert(){
+        this.converting=true;
+        (async () => {
+            const connex = window.connex
+            if(this.conversionType === ConversionType.ToVTHO){
+                const VMOutPut = await methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)], '0x0')
+                const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
+                let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
+                
+                console.log('minReturn', minReturn.dividedBy(1e18).toString())
+                let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
+                let ret = await connex.vendor.sign("tx", [{...clause, desc: `Calling convert to VTHO function`}], {summary: `Converting ${this.VET2VTHO} VET to VTHO`})
+                alert(`Transaction ID: ${ret.txId}`)
+            }else{
+                const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
+                const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call([amount.toString(10)], '0x0')
+                const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
+                let minReturn = convertedVET.dividedBy(this.priceLoss/100+1)
+
+                
+                let convertClause = methodOfEnergyStation('convertForVET')!.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
+                let approveClause = methodOfEnergy('approve')!.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
+
+                let clauses = []
+                if(!this.noApprove){
+                    clauses.push({...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`})
+                }
+                clauses.push({...convertClause, desc:'Calling convert to VET function'})
+
+                let ret = await connex.vendor.sign("tx", clauses, {summary: `Converting ${this.VTHO2VET} VTHO to VET`})
+                alert(`Transaction ID: ${ret.txId}`)
+            }
+        })().catch(e => {
+            console.log(e)
+            alert('Convet failed caused by: '+e.message)
+        })
     }
     async getLastConversion(){
 
@@ -336,13 +374,13 @@ export default class App extends Vue {
     }
     async getInitialInfo(){
         let connex = window.connex;
-        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([])
+        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([], '0x0')
         this.baseInfo['VET Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
-        ret = await methodOfEnergyStation('energyVirtualBalance')!.call([])        
+        ret = await methodOfEnergyStation('energyVirtualBalance')!.call([], '0x0')        
         this.baseInfo['VTHO Balance'] = this.fromWeitoDisplayValue(this.exactValueFromDeocded(ret, '0'))
-        ret = await methodOfEnergyStation('conversionFee')!.call([])
+        ret = await methodOfEnergyStation('conversionFee')!.call([], '0x0')
         this.baseInfo['Conversion Rate'] = this.exactValueFromDeocded(ret, '0')/10000 + '%'
-        ret = await methodOfEnergyStation('owner')!.call([])  
+        ret = await methodOfEnergyStation('owner')!.call([], '0x0')  
         this.baseInfo['Owner'] = this.exactValueFromDeocded(ret, '0')
     }
     fromWeitoDisplayValue(input: any){
@@ -382,23 +420,25 @@ export default class App extends Vue {
             this.fromTokenValue = this.VTHO2VET
             this.toTokenValue = this.convertedVET
         }else{
-            this.fromTokenValue = this.VTHO2VET
-            this.toTokenValue = this.convertedVET
+            this.fromTokenValue = this.VET2VTHO
+            this.toTokenValue = this.convertedVTHO
         }
+        this.showAdvanced = false
         this.getPriceLimit()
         this.priceLoss = 2
         this.showNoApproveOption = false
-        this.noApprove = true
+        this.noApprove = false
+        this.converting=false
     }
     async checkApproval(){
-        if(this.conversionType !== ConversionType.ToVTHO){
+        if(this.conversionType !== ConversionType.ToVET){
             return
         }
         // TODO: need sync to implement link account
         let spender = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed'
-        let ret = await methodOfEnergy('allowance')!.call([],)
+        let ret = await methodOfEnergy('allowance')!.call([spender, EnergyStationAddress],'0x0')
         const remaining  =  this.exactValueFromDeocded(ret, 'remaining')
-        if(new BigNumber(remaining).dividedBy(1e18).isGreaterThanOrEqualTo(this.VET2VTHO)){
+        if(new BigNumber(remaining).dividedBy(1e18).isGreaterThanOrEqualTo(this.VTHO2VET)){
             this.showNoApproveOption = true
         }else{
             this.showNoApproveOption = false

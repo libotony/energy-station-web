@@ -3,10 +3,10 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faAngleDoubleUp, faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons'
+import { faAngleDoubleUp, faAngleDoubleDown, faCircleNotch } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faAngleDoubleUp, faAngleDoubleDown)
+library.add(faAngleDoubleUp, faAngleDoubleDown, faCircleNotch)
 
 Vue.component('fa-i', FontAwesomeIcon)
 
