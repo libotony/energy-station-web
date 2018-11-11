@@ -5,13 +5,14 @@ declare namespace Connex {
 
         ticker(): Thor.Ticker
 
-        account(addr: string, revision?: string | number): Thor.AccountVisitor
+        account(addr: string, options?: { revision?: string | number }): Thor.AccountVisitor
         block(revision: string | number): Thor.BlockVisitor
-        transaction(id: string, head?: string): Thor.TransactionVisitor
+        transaction(id: string, options?: { head?: string }): Thor.TransactionVisitor
         filter<T extends 'event' | 'transfer'>(kind: T, criteriaSet: Array<Thor.Criteria<T>>): Thor.Filter<T>
-        subscribe<T extends 'event' | 'transfer' | 'block'>(subject: T, criteria: Thor.Criteria<T>): Thor.Subscription<T>
-        call(input: Thor.VMInput, revision?: string | number): Promise<Thor.VMOutput>
-        commit(rawTx: string): Promise<Thor.TransactionVisitor>
+        subscribe<T extends 'event' | 'transfer' | 'block'>
+            (subject: T, criteria: Thor.Criteria<T>, options?: { position?: string }): Thor.Subscription<T>
+
+        explain(clauses: Thor.Clause[], options?: Thor.CallOptions & { revision?: string | number }): Promise<Thor.VMOutput[]>
     }
 
     namespace Thor {
@@ -52,12 +53,10 @@ declare namespace Connex {
 
         interface AccountVisitor {
             readonly address: string
-            readonly revision: string | number | undefined
             get(): Promise<Account>
             getCode(): Promise<Account.Code>
             getStorage(key: string): Promise<Account.Storage>
 
-            call(input: VMInput): Promise<VMOutput>
             method(abi: object): Method
             event(abi: object): EventVisitor
         }
@@ -78,14 +77,14 @@ declare namespace Connex {
         }
 
         interface Method {
-            asClause(args: any[], value?: string | number): Clause
-            call(args: any[], value?: string | number, options?: VMOptions): Promise<VMOutput & Decoded>
+            asClause(args: any[], value: string | number): Clause
+            call(args: any[], value: string | number, options?: CallOptions): Promise<VMOutput & Decoded>
         }
 
         interface EventVisitor {
             asCriteria(indexed: object): Event.Criteria
             filter(indexed: object[]): Filter<'decoded-event'>
-            subscribe(indexed: object): Subscription<'decoded-event'>
+            subscribe(indexed: object, options?: { position?: string }): Subscription<'decoded-event'>
         }
 
         interface TransactionVisitor {
@@ -134,7 +133,7 @@ declare namespace Connex {
 
         type Clause = {
             to: string | null
-            value: string
+            value: string | number
             data: string
         }
 
@@ -193,9 +192,8 @@ declare namespace Connex {
         }
 
         type Criteria<T extends 'event' | 'transfer' | 'block'> =
-            { position?: string } &
-            (T extends 'event' ? Event.Criteria :
-                T extends 'transfer' ? Transfer.Criteria : {})
+            T extends 'event' ? Event.Criteria :
+            T extends 'transfer' ? Transfer.Criteria : {}
 
         type Range = {
             unit: 'block' | 'time'
@@ -225,16 +223,12 @@ declare namespace Connex {
             isTrunk: boolean
         }
 
-        type VMOptions = {
+        type CallOptions = {
             gas?: number
             gasPrice?: string
             caller?: string
         }
 
-        type VMInput = {
-            data?: string
-            value?: string | number
-        } & VMOptions
 
         type VMOutput = {
             data: string
