@@ -84,50 +84,62 @@
         header-text-variant="light"
         hide-header-close
         centered>
-        <b-container fluid class="mt-3"> 
-            <b-row class="text-center" align-v="center">
-                <b-col><p><span style="font-size:1.5rem">{{fromTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{fromTokenType}}</span></p></b-col>
-                <b-col><p style="font-size:3rem">⇒</p></b-col>
-                <b-col><p><span style="font-size:1.5rem">{{toTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{toTokenType}}</span></p></b-col>
-            </b-row>
-            <b-row>
-                <b-col>
-                    <p style="font-size:0.75rem" class="d-flex justify-content-end"><span class="text-muted">Rate:&nbsp;</span><span class="">1 {{toTokenType}}={{convertRate}} {{fromTokenType}}</span></p>
-                </b-col>
-            </b-row>
-        </b-container>
-        <b-container fluid>
-            <b-row>
-                <b-card class="w-100">
-                    <b-container fluid> 
-                        <b-row align-h="between" @click="showAdvanced=!showAdvanced">
-                            <b-col class="d-flex justify-content-start text-muted">ADVANCED SEETINGS</b-col>
-                            <b-col class="d-flex justify-content-end text-muted"><fa-i :icon="showAdvanced?'angle-double-up':'angle-double-down'" size="lg"></fa-i></b-col>
-                        </b-row>
-                        <b-row>
-                            <b-col>
-                                <b-collapse v-model="showAdvanced" id="advanced">
-                                    <b-form-group class="mt-3" label="PRICE LIMIT" label-size="sm" label-class="text-muted" >
-                                        <b-input-group size="sm" :append="fromTokenType">
-                                            <b-form-input v-model="priceLimit" readonly></b-form-input>
-                                        </b-input-group>
-                                    </b-form-group>
-                                    <b-form-group class="mt-3" label="PRICE CHANGE" label-size="sm" label-class="text-muted" >
-                                        <b-input-group size="sm" append="%">
-                                            <b-form-input v-model="priceLoss" type="number" :formatter="formatPercentage" @input="calcPriceLimit"></b-form-input>
-                                        </b-input-group>
-                                    </b-form-group>
-                                    <b-form-group label-class="text-muted" label="NO VTHO APPROVE CLAUSE" v-show="showNoApproveOption">
-                                        <b-form-checkbox v-model="noApprove"><span class="text-muted">I have appoved enough amount before this.</span></b-form-checkbox>
-                                    </b-form-group>
-                                </b-collapse>
-                            </b-col>
-                        </b-row>
-                    </b-container>
-                </b-card>
-            </b-row>
-        </b-container>
-        <b-btn slot="modal-footer" block variant="primary" size="lg" @click="doConvert" :disabled="converting"><fa-i icon="circle-notch" spin v-show="converting"></fa-i>{{converting?'&nbsp;&nbsp;Processing':'OK'}}</b-btn>
+        <div v-show="!showError && !showSuccess">
+            <b-container fluid class="mt-3"> 
+                <b-row class="text-center" align-v="center">
+                    <b-col><p><span style="font-size:1.5rem">{{fromTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{fromTokenType}}</span></p></b-col>
+                    <b-col><p style="font-size:3rem">⇒</p></b-col>
+                    <b-col><p><span style="font-size:1.5rem">{{toTokenValue}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{toTokenType}}</span></p></b-col>
+                </b-row>
+                <b-row>
+                    <b-col>
+                        <p style="font-size:0.75rem" class="d-flex justify-content-end"><span class="text-muted">Rate:&nbsp;</span><span class="">1 {{toTokenType}}={{convertRate}} {{fromTokenType}}</span></p>
+                    </b-col>
+                </b-row>
+                <b-row>
+                    <b-card class="w-100">
+                        <b-container fluid> 
+                            <b-row align-h="between" @click="showAdvanced=!showAdvanced">
+                                <b-col class="d-flex justify-content-start text-muted">ADVANCED SEETINGS</b-col>
+                                <b-col class="d-flex justify-content-end text-muted"><fa-i :icon="showAdvanced?'angle-double-up':'angle-double-down'" size="lg"></fa-i></b-col>
+                            </b-row>
+                            <b-row>
+                                <b-col>
+                                    <b-collapse v-model="showAdvanced" id="advanced">
+                                        <b-form-group class="mt-3" label="PRICE LIMIT" label-size="sm" label-class="text-muted" >
+                                            <b-input-group size="sm" :append="fromTokenType">
+                                                <b-form-input v-model="priceLimit" readonly></b-form-input>
+                                            </b-input-group>
+                                        </b-form-group>
+                                        <b-form-group class="mt-3" label="PRICE CHANGE" label-size="sm" label-class="text-muted" >
+                                            <b-input-group size="sm" append="%">
+                                                <b-form-input v-model="priceLoss" type="number" :formatter="formatPercentage" @input="calcPriceLimit"></b-form-input>
+                                            </b-input-group>
+                                        </b-form-group>
+                                        <b-form-group label-class="text-muted" label="NO VTHO APPROVE CLAUSE" v-show="showNoApproveOption">
+                                            <b-form-checkbox v-model="noApprove"><span class="text-muted">I have appoved enough amount before this.</span></b-form-checkbox>
+                                        </b-form-group>
+                                    </b-collapse>
+                                </b-col>
+                            </b-row>
+                        </b-container>
+                    </b-card>
+                </b-row>
+            </b-container>
+        </div>
+        <transition name="move-in">
+            <div v-show="showError || showSuccess">
+                <b-container fluid class="mt-3">
+                    <b-row> 
+                        <b-col class="d-flex justify-content-center"><fa-i icon="check-circle" size="6x" style="color: #28a745"></fa-i></b-col>
+                    </b-row>
+                    <b-row class="mt-5">
+                        <p class="text-success text-center" style="word-wrap: break-word;word-break: break-all;overflow: hidden;">Success!<br>TXID: 0xdf31422daa55e2f30eba476a72c0f66eb54be65d83f4a0318c6be52db1188a0f</p>
+                    </b-row>
+                </b-container>
+            </div>
+        </transition>
+        <b-btn slot="modal-footer" block variant="primary" size="lg" @click="showSuccess=true" :disabled="converting"><fa-i icon="circle-notch" spin v-show="converting"></fa-i>{{converting?'&nbsp;&nbsp;Processing':'OK'}}</b-btn>
     </b-modal>
   </div>
 </template>
@@ -222,6 +234,9 @@ export default class App extends Vue {
     showNoApproveOption = false
     noApprove = false
     converting=false
+    showError=false
+    showSuccess=false
+    resultMsg = ''
 
     created() {
         if (!window.connex) {
@@ -237,13 +252,6 @@ export default class App extends Vue {
             })
         }
     }
-
-    // showModalMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
-    //     this.modalType = type
-    //     this.modalMsg = msg
-    //     this.showModal = true
-    // }
-
     showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
         this.sysAlertType = type
         this.systemMsg = msg
@@ -274,44 +282,13 @@ export default class App extends Vue {
         })
     }
     proceedForEnergy() {
-        this.showModal = true
         this.initConvertModal(ConversionType.ToVTHO)
- 
-        // (async () => {
-        //     const connex = window.connex
-
-        //     const VMOutPut = await getEnergyReturn.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)])
-        //     const convertedEnergy = new BigNumber((this.exactValueFromDeocded(VMOutPut ,'canAcquire')))
-        //     let minReturn = convertedEnergy.multipliedBy(0.99)
-
-        //     let clause = convertForEnergy.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
-        //     let ret = await connex.vendor.sign("tx", [{...clause, desc: `Converting ${this.VET2VTHO} VET to VTHO`}])
-        //     this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
-        // })().catch(e => {
-        //     this.showModalMessage('Convet failed caused by: '+e.message)
-        // })
+        this.showModal = true
     }
     proceedForVET() {
-        this.showModal = true
         this.initConvertModal(ConversionType.ToVET)
-        this.checkApproval()
-
-        // (async () => {
-        //     const connex = window.connex
-
-        //     const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
-        //     const VMOutPut = await getVETReturn.call([amount.toString(10)])
-        //     const convertedVET= new BigNumber(this.exactValueFromDeocded(VMOutPut ,'canAcquire'))
-        //     let minReturn = convertedVET.multipliedBy(0.99)
-
-        //     let approveClause = energyApprove.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
-        //     let convertClause = convertForVET.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
-
-        //     let ret = await connex.vendor.sign("tx", [ {...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`}, {...convertClause, desc:'Convert from VTHO to VET'}])
-        //     this.showModalMessage(`Transaction ID: ${ret.txId}`, 'success')
-        // })().catch(e => {
-        //     this.showModalMessage('Convet failed caused by: '+e.message)
-        // })
+        // this.checkApproval()
+        this.showModal = true
     }
     doConvert(){
         this.converting=true;
@@ -325,7 +302,7 @@ export default class App extends Vue {
                 console.log('minReturn', minReturn.dividedBy(1e18).toString())
                 let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
                 let ret = await connex.vendor.sign("tx", [{...clause, desc: `Calling convert to VTHO function`}], {summary: `Converting ${this.VET2VTHO} VET to VTHO`})
-                alert(`Transaction ID: ${ret.txId}`)
+                this.showSuccessMsg(`Transaction ID: ${ret.txId}`)
             }else{
                 const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
                 const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call([amount.toString(10)], '0x0')
@@ -343,7 +320,7 @@ export default class App extends Vue {
                 clauses.push({...convertClause, desc:'Calling convert to VET function'})
 
                 let ret = await connex.vendor.sign("tx", clauses, {summary: `Converting ${this.VTHO2VET} VTHO to VET`})
-                alert(`Transaction ID: ${ret.txId}`)
+                this.showSuccessMsg(`Transaction ID: ${ret.txId}`)
             }
         })().catch(e => {
             console.log(e)
@@ -429,6 +406,16 @@ export default class App extends Vue {
         this.showNoApproveOption = false
         this.noApprove = false
         this.converting=false
+        this.showSuccess=false
+        this.showError = false
+        this.resultMsg = ''
+    }
+    // showErrorMsg(msg: string){
+        
+    // }
+    showSuccessMsg(msg: string){
+        this.resultMsg = msg
+        this.showSuccess = true
     }
     async checkApproval(){
         if(this.conversionType !== ConversionType.ToVET){
@@ -476,5 +463,17 @@ export default class App extends Vue {
 }
 .advanced{
     font-size: 0.75rem
+}
+.move-in-enter-active { 
+    transition: all 0.5s ease-in; 
+} 
+.move-in-enter { 
+    opacity: 0; 
+} 
+.move-in-enter { 
+    transform: translateX(31px); 
+}
+.move-in-leave { 
+    display: none; 
 }
 </style>
