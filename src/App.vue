@@ -18,9 +18,14 @@
     <b-container class="pt-4">
         <div class="vld-parent">
             <loading :active="!ready" :is-full-page="false" color="#007bff" :opacity="0.6"></loading>
-            <basic-info v-on:update-status="updateInitStatus" v-on:error="onError"></basic-info>
-            <conversion-records v-on:update-status="updateInitStatus" v-on:error="onError"> </conversion-records>
-            <convert-cards></convert-cards>
+            <basic-info v-on:update-status="onUpdateInitStatus" v-on:error="onErrored"></basic-info>
+            <conversion-records v-on:update-status="onUpdateInitStatus" v-on:error="onErrored"> </conversion-records>
+            <convert-cards v-on:convert="onConvert"></convert-cards>
+            <convert-modal 
+            :conversion-status.sync="conversionStatus"
+            :conversion-type="conversionType"
+            :from-token-value="fromTokenValue"
+            ></convert-modal>
         </div>
     </b-container>
   </div>
@@ -31,11 +36,12 @@ import { Component, Vue, Watch } from "vue-property-decorator"
 import debounce from 'lodash.debounce'
 import { BigNumber } from "bignumber.js"
 
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/vue-loading.css'
 import ConversionRecords from './components/conversion-records.vue'
 import BasicInfo from './components/basic-info.vue'
 import ConvertCards from './components/convert-cards.vue'
+import ConvertModal from './components/convert-modal.vue'
 
 import {
     EnergyStationAddress,
@@ -46,14 +52,15 @@ import {
     extractValueFromDecoded,
     fromWeiToDisplayValue
 } from "./contracts"
-import {ConversionType,InitStatus} from './types'
+import {ConversionType,InitStatus, ConversionStatus} from './types'
 
 @Component({
     components:{
         Loading,
         ConversionRecords,
         BasicInfo,
-        ConvertCards
+        ConvertCards,
+        ConvertModal
     }
 })
 
@@ -66,21 +73,23 @@ export default class App extends Vue {
     initStatus=InitStatus.Initial
     initErrored = false
 
-
     // conversion popup modal
-    showModal=false
-    conversionType:ConversionType = ConversionType.ToVTHO
+    conversionStatus = ConversionStatus.Initial
+    conversionType = ConversionType.ToVET
     fromTokenValue = '0'
-    toTokenValue = '0'
-    showAdvanced = false
-    priceLoss = 2
-    priceLimit = '0'
-    showNoApproveOption = false
-    noApprove = false
-    converting=false
-    showError=false
-    showSuccess=false
-    resultMsg = ''
+    // showModal=false
+    // conversionType = ConversionType.ToVTHO
+    // fromTokenValue = '0'
+    // toTokenValue = '0'
+    // showAdvanced = false
+    // priceLoss = 2
+    // priceLimit = '0'
+    // showNoApproveOption = false
+    // noApprove = false
+    // converting=false
+    // showError=false
+    // showSuccess=false
+    // resultMsg = ''
 
     created() {
         if (!window.connex) {
@@ -88,24 +97,35 @@ export default class App extends Vue {
             this.initErrored=true
         }
     }
-    showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
-        this.sysAlertType = type
-        this.systemMsg = msg
-        this.showSystemMsg = true
-    }
+
     get ready(){
         return !(this.initStatus ^ InitStatus.Finish) && !this.initErrored
     }
-    updateInitStatus(value:number){
+
+    onUpdateInitStatus(value:number){
         this.initStatus ^= value
     }
-    onError(){
+    onErrored(){
         if(!this.initErrored){
             this.showSysMessage('Init Failed!', 'danger')
             this.initErrored=true
         }
     }
+    onConvert(data:{
+        type: ConversionType,
+        value: string
+    }){
+        console.log(data)
+        this.conversionType = data.type
+        this.fromTokenValue = data.value
+        this.conversionStatus = ConversionStatus.Start
+    }
 
+    showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
+        this.sysAlertType = type
+        this.systemMsg = msg
+        this.showSystemMsg = true
+    }
 
     // proceedForEnergy() {
     //     this.initConvertModal(ConversionType.ToVTHO)

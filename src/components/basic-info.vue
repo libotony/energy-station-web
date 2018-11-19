@@ -37,13 +37,13 @@ export default class App extends Vue {
 
     async getInitialInfo(){
         let connex = window.connex;
-        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([], '0x0')
+        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([], 0)
         this.basicInfo['VET Balance'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
-        ret = await methodOfEnergyStation('energyVirtualBalance')!.call([], '0x0')        
+        ret = await methodOfEnergyStation('energyVirtualBalance')!.call([], 0)        
         this.basicInfo['VTHO Balance'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
-        ret = await methodOfEnergyStation('conversionFee')!.call([], '0x0')
+        ret = await methodOfEnergyStation('conversionFee')!.call([], 0)
         this.basicInfo['Conversion Rate'] = extractValueFromDecoded(ret, '0')/10000 + '%'
-        ret = await methodOfEnergyStation('owner')!.call([], '0x0')  
+        ret = await methodOfEnergyStation('owner')!.call([], 0)  
         this.basicInfo['Owner'] = extractValueFromDecoded(ret, '0')
     }
 

@@ -80,7 +80,7 @@ export default class App extends Vue {
             this.convertedVTHO = '0'
             return
         }
-        methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)],'0x0').then(VMOutPut => {
+        methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)], 0).then(VMOutPut => {
             this.calcedVTHO  = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire')))
             this.convertedVTHO = fromWeiToDisplayValue(this.calcedVTHO)
         })
@@ -90,7 +90,7 @@ export default class App extends Vue {
             this.convertedVET = '0'
             return
         }
-        methodOfEnergyStation('getVETReturn')!.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)], '0x0').then(VMOutPut => {
+        methodOfEnergyStation('getVETReturn')!.call([new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)], 0).then(VMOutPut => {
             this.calcedVET  = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire')))
             this.convertedVET = fromWeiToDisplayValue(this.calcedVET)
         })
@@ -103,10 +103,16 @@ export default class App extends Vue {
         }
     }
     proceedForEnergy(){
-
+        this.$emit('convert', {
+            type: ConversionType.ToVTHO,
+            value: new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)
+        })
     }
     proceedForVET(){
-        
+        this.$emit('convert', {
+            type: ConversionType.ToVET,
+            value: new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)
+        })
     }
 }
 </script>

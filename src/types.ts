@@ -8,6 +8,7 @@ export enum ConversionType {
 export enum ConversionStatus {
     Initial,
     Start,
+    Initiated,
     Processing,
     Success,
     Error
