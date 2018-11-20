@@ -63,7 +63,7 @@ export default class App extends Vue {
             item.converted = fromWeiToDisplayValue(extractValueFromDecoded(log, '_return'))
             conversions.push(item)
         }
-        return conversions
+        return conversions.reverse()
     }
 
 }

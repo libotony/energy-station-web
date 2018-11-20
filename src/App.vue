@@ -174,25 +174,7 @@ export default class App extends Vue {
     //     })
     // }
 
-
-    // formatPercentage(input: string){
-    //     if(!isNaN(parseInt(input)) && parseInt(input)>= 0){
-    //         if(parseInt(input)>100){
-    //             return 100
-    //         }
-    //         return parseInt(input)
-    //     }else{
-    //         return 0
-    //     }
-    // }
-    // calcPriceLimit = debounce(this.getPriceLimit, 200)
-    // getPriceLimit(){
-    //     if(this.conversionType === ConversionType.ToVTHO){
-    //         this.priceLimit = new BigNumber(this.VET2VTHO).multipliedBy(1e18).dividedBy(this.calcedVTHO).multipliedBy(1+this.priceLoss/100).dp(6).toString(10)
-    //     }else{
-    //         this.priceLimit = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dividedBy(this.calcedVET).multipliedBy(1+this.priceLoss/100).dp(6).toString(10)
-    //     }
-    // }
+ 
     // initConvertModal(conversionType: ConversionType){
     //     this.conversionType = conversionType
     //     if(conversionType === ConversionType.ToVET){
@@ -229,13 +211,6 @@ export default class App extends Vue {
     //         this.showNoApproveOption = true
     //     }else{
     //         this.showNoApproveOption = false
-    //     }
-    // }
-    // get convertRate(){
-    //     if(this.conversionType === ConversionType.ToVTHO){
-    //         return new BigNumber(this.VET2VTHO).multipliedBy(1e18).dividedBy(this.calcedVTHO).dp(6).toString(10)
-    //     }else{
-    //         return new BigNumber(this.VTHO2VET).multipliedBy(1e18).dividedBy(this.calcedVET).dp(6).toString(10)
     //     }
     // }
 }
