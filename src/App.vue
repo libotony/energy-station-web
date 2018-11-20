@@ -77,19 +77,6 @@ export default class App extends Vue {
     conversionStatus = ConversionStatus.Initial
     conversionType = ConversionType.ToVET
     fromTokenValue = '0'
-    // showModal=false
-    // conversionType = ConversionType.ToVTHO
-    // fromTokenValue = '0'
-    // toTokenValue = '0'
-    // showAdvanced = false
-    // priceLoss = 2
-    // priceLimit = '0'
-    // showNoApproveOption = false
-    // noApprove = false
-    // converting=false
-    // showError=false
-    // showSuccess=false
-    // resultMsg = ''
 
     created() {
         if (!window.connex) {
@@ -115,7 +102,6 @@ export default class App extends Vue {
         type: ConversionType,
         value: string
     }){
-        console.log(data)
         this.conversionType = data.type
         this.fromTokenValue = data.value
         this.conversionStatus = ConversionStatus.Start
@@ -127,92 +113,6 @@ export default class App extends Vue {
         this.showSystemMsg = true
     }
 
-    // proceedForEnergy() {
-    //     this.initConvertModal(ConversionType.ToVTHO)
-    //     this.showModal = true
-    // }
-    // proceedForVET() {
-    //     this.initConvertModal(ConversionType.ToVET)
-    //     // this.checkApproval()
-    //     this.showModal = true
-    // }
-    // doConvert(){
-    //     this.converting=true;
-    //     (async () => {
-    //         const connex = window.connex
-    //         if(this.conversionType === ConversionType.ToVTHO){
-    //             const VMOutPut = await methodOfEnergyStation('getEnergyReturn')!.call([new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)], '0x0')
-    //             const convertedEnergy = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire')))
-    //             let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
-                
-    //             console.log('minReturn', minReturn.dividedBy(1e18).toString())
-    //             let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(16))
-    //             let ret = await connex.vendor.sign("tx", [{...clause, desc: `Calling convert to VTHO function`}], {summary: `Converting ${this.VET2VTHO} VET to VTHO`})
-    //             this.showSuccessMsg(`Transaction ID: ${ret.txId}`)
-    //         }else{
-    //             const amount = new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0)
-    //             const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call([amount.toString(10)], '0x0')
-    //             const convertedVET= new BigNumber(extractValueFromDecoded(VMOutPut ,'canAcquire'))
-    //             let minReturn = convertedVET.dividedBy(this.priceLoss/100+1)
-
-                
-    //             let convertClause = methodOfEnergyStation('convertForVET')!.asClause([amount.toString(10), minReturn.dp(0).toString(10)],"0x0")
-    //             let approveClause = methodOfEnergy('approve')!.asClause([EnergyStationAddress, amount.toString(10)],"0x0")
-
-    //             let clauses = []
-    //             if(!this.noApprove){
-    //                 clauses.push({...approveClause,desc:`Approve EnergyStation to spent ${this.VTHO2VET} VTHO`})
-    //             }
-    //             clauses.push({...convertClause, desc:'Calling convert to VET function'})
-
-    //             let ret = await connex.vendor.sign("tx", clauses, {summary: `Converting ${this.VTHO2VET} VTHO to VET`})
-    //             this.showSuccessMsg(`Transaction ID: ${ret.txId}`)
-    //         }
-    //     })().catch(e => {
-    //         console.log(e)
-    //         alert('Convet failed caused by: '+e.message)
-    //     })
-    // }
-
- 
-    // initConvertModal(conversionType: ConversionType){
-    //     this.conversionType = conversionType
-    //     if(conversionType === ConversionType.ToVET){
-    //         this.fromTokenValue = this.VTHO2VET
-    //         this.toTokenValue = this.convertedVET
-    //     }else{
-    //         this.fromTokenValue = this.VET2VTHO
-    //         this.toTokenValue = this.convertedVTHO
-    //     }
-    //     this.showAdvanced = false
-    //     this.getPriceLimit()
-    //     this.priceLoss = 2
-    //     this.showNoApproveOption = false
-    //     this.noApprove = false
-    //     this.converting=false
-    //     this.showSuccess=false
-    //     this.showError = false
-    //     this.resultMsg = ''
-    // }
-
-    // showSuccessMsg(msg: string){
-    //     this.resultMsg = msg
-    //     this.showSuccess = true
-    // }
-    // async checkApproval(){
-    //     if(this.conversionType !== ConversionType.ToVET){
-    //         return
-    //     }
-    //     // TODO: need sync to implement link account
-    //     let spender = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed'
-    //     let ret = await methodOfEnergy('allowance')!.call([spender, EnergyStationAddress],'0x0')
-    //     const remaining  =  extractValueFromDecoded(ret, 'remaining')
-    //     if(new BigNumber(remaining).dividedBy(1e18).isGreaterThanOrEqualTo(this.VTHO2VET)){
-    //         this.showNoApproveOption = true
-    //     }else{
-    //         this.showNoApproveOption = false
-    //     }
-    // }
 }
 </script>
 

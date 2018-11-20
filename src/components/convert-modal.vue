@@ -213,7 +213,6 @@ export default class App extends Vue {
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     
-                    console.log('minReturn', minReturn.dividedBy(1e18).toString())
                     let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16))
                     let ret = await connex.vendor.sign("tx", [{...clause, desc: `Calling convert to VTHO function`}], {summary: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`})
                     this.$emit('update:conversionStatus', ConversionStatus.Success)
