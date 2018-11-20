@@ -27,6 +27,9 @@ export default class App extends Vue {
         rate:{
             label: 'Rate(VTHO/VET)'
         },
+        conversionTime:{
+            label: 'Time'
+        },
         fee:{
             label: 'Fee'
         }
@@ -42,6 +45,15 @@ export default class App extends Vue {
                 console.log(e.message)
                 this.$emit('error')
             })
+            ;(async()=>{
+                const connex = window.connex
+                for(;;){
+                    await connex.thor.ticker().next()
+                    this.conversions = await this.getLastConversion()
+                }
+            })().catch(e=>{
+                console.log(e)
+            })
         }
     }
 
@@ -49,7 +61,9 @@ export default class App extends Vue {
         let logs = await eventOfEnergyStation('Conversion')!.filter([]).order("desc").next(0, 5)
         let conversions: Array<ConversionEvent> = []
         for (let log of logs) {
-            let item: ConversionEvent = {}
+            let item: ConversionEvent = {
+                id: log.meta.txID + log.meta.blockID
+            }
             if ((log.decoded as decodedReturn)['tradeType'] == '1') {
                 item.conversion = "VTHO→VET"
                 item.rate = new BigNumber(extractValueFromDecoded(log, '_sellAmount')).dividedBy(extractValueFromDecoded(log, '_return')).dp(4).toString(10)
@@ -61,6 +75,7 @@ export default class App extends Vue {
             }
             item.amount = fromWeiToDisplayValue(extractValueFromDecoded(log, '_sellAmount'))
             item.converted = fromWeiToDisplayValue(extractValueFromDecoded(log, '_return'))
+            item.conversionTime = new Date(log.meta.blockTimestamp * 1000).format('yyyy-MM-dd hh:mm:ss')
             conversions.push(item)
         }
         return conversions.reverse()
