@@ -11,9 +11,9 @@
             <loading :active="modalInitiating" :is-full-page="false" color="#007bff" :opacity="0.6"></loading>
                 <b-container fluid class="mt-3"> 
                     <b-row class="text-center" align-v="center">
-                        <b-col><p><span style="font-size:1.5rem">{{fromWeiToDisplayValue(fromTokenValue)}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{fromTokenType}}</span></p></b-col>
+                        <b-col><p><span style="font-size:1.5rem">{{fromWeiToDisplayValueWithThousandth(fromTokenValue)}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{fromTokenType}}</span></p></b-col>
                         <b-col><p style="font-size:3rem">⇒</p></b-col>
-                        <b-col><p><span style="font-size:1.5rem">{{fromWeiToDisplayValue(toTokenValue)}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{toTokenType}}</span></p></b-col>
+                        <b-col><p><span style="font-size:1.5rem">{{fromWeiToDisplayValueWithThousandth(toTokenValue)}}</span><span style="font-size:0.75rem;">&nbsp;&nbsp;{{toTokenType}}</span></p></b-col>
                     </b-row>
                     <b-row>
                         <b-col>
@@ -94,6 +94,7 @@ import {
     methodOfEnergyStation,
     methodOfEnergy,
     fromWeiToDisplayValue,
+    fromWeiToDisplayValueWithThousandth,
     extractValueFromDecoded
 } from "../contracts"
 import {ConversionType, ConversionStatus} from '../types'

@@ -60,3 +60,7 @@ export const extractValueFromDecoded = function(output: Connex.Thor.Decoded, key
 export const fromWeiToDisplayValue = function(input: any){
     return new BigNumber(input).dividedBy(1e18).dp(4).toString(10)
 }
+
+export const fromWeiToDisplayValueWithThousandth = function (input: any) {
+    return new BigNumber(input).dividedBy(1e18).dp(4).toFormat()
+}
