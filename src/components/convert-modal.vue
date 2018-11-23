@@ -54,7 +54,7 @@
                     </b-row>
                 </b-container>
                 <transition name="move-in">
-                    <div v-show="showMessage" key="success-info" style="min-height:210px">
+                    <div v-show="showMessage" key="success-info">
                         <b-container fluid  class="d-flex flex-column justify-content-center" style="min-height:210px">
                             <b-row> 
                                 <b-col class="d-flex justify-content-center"><fa-i :icon="showSuccess?'check-circle':'times-circle'" size="6x" :style="{color: showSuccess?'#28a745':'#dc3545'}"></fa-i></b-col>
@@ -389,6 +389,6 @@ export default class ConvertModal extends Vue {
 }
 .status-badge{
     position: relative;
-    bottom: 2px;
+    bottom: 1px;
 }
 </style>
