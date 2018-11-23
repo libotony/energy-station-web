@@ -114,7 +114,8 @@ export default class ConvertModal extends Vue {
     // Prop
     @Prop(Number) conversionType!: ConversionType
     @Prop(Number) conversionStatus!: ConversionStatus
-    @Prop() fromTokenValue!: string
+    @Prop(String) fromTokenValue!: string
+    @Prop(String) txID!:string
 
     // Data
     toTokenValue = '0'
@@ -125,7 +126,6 @@ export default class ConvertModal extends Vue {
     showNoApproveOption = false
     checkConfirmtion = false
     message = ''
-    txID = ''
     stopReceiptWating = true
     confirmCount = 0
     txReverted = false
@@ -212,7 +212,6 @@ export default class ConvertModal extends Vue {
             this.showNoApproveOption = false
             this.checkConfirmtion = false
             this.message = ''
-            this.txID = ''
             this.stopReceiptWating = true
             this.confirmCount = 0
             this.txReverted =false
@@ -274,7 +273,7 @@ export default class ConvertModal extends Vue {
                     clauses.push({...convertClause, desc:'Calling convert to VET function'})
                     signResult = await connex.vendor.sign("tx", clauses, {summary: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`})
                 }
-                this.txID = signResult.txId
+                this.$emit('update:txID', signResult.txId)
                 if(this.checkConfirmtion){
                     this.checkReceipt()
                 }else{
@@ -360,6 +359,13 @@ export default class ConvertModal extends Vue {
         if(val===ConversionStatus.Start && oldVal === ConversionStatus.Initial){
             (<Element & {show: Function}>this.$refs.modal).show()
             this.init()
+        }
+        if(val===ConversionStatus.Confirming && oldVal === ConversionStatus.Initial){
+            (<Element & {show: Function}>this.$refs.modal).show()
+            this.message = ''
+            this.confirmCount = 0
+            this.txReverted =false
+            this.checkReceipt()
         }
     } 
 

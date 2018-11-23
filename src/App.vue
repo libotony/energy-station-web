@@ -23,6 +23,7 @@
             <convert-cards v-on:convert="onConvert"></convert-cards>
             <convert-modal 
             :conversion-status.sync="conversionStatus"
+            :tx-i-d.sync="txID"
             :conversion-type="conversionType"
             :from-token-value="fromTokenValue"
             ></convert-modal>
@@ -54,6 +55,15 @@ import {
 } from "./contracts"
 import {ConversionType,InitStatus, ConversionStatus} from './types'
 
+const GetQueryString = function(name:string) {
+    const reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    let r = window.location.search.substr(1).match(reg);
+    let context = "";
+    if (r != null)
+        context = r[2];
+    return context == null || context == "" || context == "undefined" ? null : context;
+}
+
 @Component({
     components:{
         Loading,
@@ -77,11 +87,23 @@ export default class App extends Vue {
     conversionStatus = ConversionStatus.Initial
     conversionType = ConversionType.ToVET
     fromTokenValue = '0'
+    txID=''
 
     created() {
         if (!window.connex) {
             this.showSysMessage("No connex environment detacted, please download sync!", 'danger')
             this.initErrored=true
+        }
+    }
+    mounted(){
+        let urlParam = GetQueryString('txid')
+        if(urlParam){
+            let txid
+            if (/^(-0x|0x)?[0-9a-fA-F]{64}$/i.test(urlParam)) {
+                txid = urlParam.startsWith('0x') ? urlParam : '0x'+urlParam
+                this.txID = txid
+                this.conversionStatus = ConversionStatus.Confirming
+            }
         }
     }
 
