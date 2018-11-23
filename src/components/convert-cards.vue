@@ -64,7 +64,7 @@ import {ConversionType, ConversionStatus} from '../types'
 const MIN_PRICE_LOSS = 2
 
 @Component
-export default class App extends Vue {
+export default class ConvertCards extends Vue {
     VET2VTHO = '0'
     VTHO2VET = '0'
     convertedVTHO = '0'

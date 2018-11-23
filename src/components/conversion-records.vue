@@ -13,7 +13,7 @@ import {eventOfEnergyStation, extractValueFromDecoded, fromWeiToDisplayValue} fr
 import { BigNumber } from 'bignumber.js'
 
 @Component
-export default class App extends Vue {
+export default class ConversionRecords extends Vue {
     tableFields = {
         conversion:{
             label: 'Conversion'

@@ -107,7 +107,7 @@ const MIN_PRICE_LOSS = 1
         Loading
     }
 })
-export default class App extends Vue {
+export default class ConvertModal extends Vue {
     // Prop
     @Prop(Number) conversionType!: ConversionType
     @Prop(Number) conversionStatus!: ConversionStatus

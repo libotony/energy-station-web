@@ -13,7 +13,7 @@ import {eventOfEnergyStation, extractValueFromDecoded, fromWeiToDisplayValue,Ene
 import { BigNumber } from 'bignumber.js'
 
 @Component
-export default class App extends Vue {
+export default class BasicInfo extends Vue {
     // basic info 
     basicInfo = {
         EnergyStationAddress,
