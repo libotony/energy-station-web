@@ -10,6 +10,7 @@ export enum ConversionStatus {
     Start,
     Initiated,
     Processing,
+    Confirming,
     Success,
     Error
 }
