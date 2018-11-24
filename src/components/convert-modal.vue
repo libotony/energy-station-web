@@ -41,7 +41,7 @@
                                                 </b-input-group>
                                             </b-form-group>
                                             <b-form-group class="mt-3" label-size="sm" label-class="text-muted" >
-                                                <b-form-checkbox v-model="checkConfirmtion"><span class="text-muted">WAIT FOR CONFIRMATION</span></b-form-checkbox>
+                                                <b-form-checkbox v-model="checkConfirmation"><span class="text-muted">WAIT FOR CONFIRMATION</span></b-form-checkbox>
                                             </b-form-group>
                                             <b-form-group label-class="text-muted" label="NO VTHO APPROVE CLAUSE" v-show="showNoApproveOption">
                                                 <b-form-checkbox v-model="noApprove"><span class="info-icon"><fa-i icon="info-circle" size="xs" v-b-tooltip.hover title="Enerngy Station will not add an approve cluase if this is checked" style="color: #6c757d;"></fa-i></span><span class="text-muted">I have appoved enough amount before this.</span></b-form-checkbox>
@@ -124,7 +124,7 @@ export default class ConvertModal extends Vue {
     priceLoss = 2
     noApprove = false
     showNoApproveOption = false
-    checkConfirmtion = false
+    checkConfirmation = false
     message = ''
     stopReceiptWating = true
     confirmCount = 0
@@ -210,7 +210,7 @@ export default class ConvertModal extends Vue {
             this.priceLoss = 2
             this.noApprove = false
             this.showNoApproveOption = false
-            this.checkConfirmtion = false
+            this.checkConfirmation = false
             this.message = ''
             this.stopReceiptWating = true
             this.confirmCount = 0
@@ -274,7 +274,7 @@ export default class ConvertModal extends Vue {
                     signResult = await connex.vendor.sign("tx", clauses, {summary: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`})
                 }
                 this.$emit('update:txID', signResult.txId)
-                if(this.checkConfirmtion){
+                if(this.checkConfirmation){
                     this.checkReceipt()
                 }else{
                     this.actionShowSuccess('Trasaction addded to the queue!')
@@ -319,12 +319,16 @@ export default class ConvertModal extends Vue {
         }
     }
     checkReceipt(){
+        console.log('checkReceipt')
         this.stopReceiptWating = false
         this.$emit('update:conversionStatus', ConversionStatus.Confirming)
         const connex = window.connex
-        const tx = connex.thor.transaction(this.txID)
 
         const updateReceiptStatus = async ()=>{
+            if(!this.txID){
+                return
+            }
+            const tx = connex.thor.transaction(this.txID)
             let receipt = await tx.getReceipt()
             if(receipt){
                 this.txReverted = receipt.reverted
@@ -338,15 +342,14 @@ export default class ConvertModal extends Vue {
         }
 
         ;(async()=>{
-            if(this.txID){
-                await updateReceiptStatus()
-                for(;;){
-                    if(this.stopReceiptWating){
-                        break
-                    }
-                    await connex.thor.ticker().next()
-                    await updateReceiptStatus()
+            console.log('check txID')
+            await updateReceiptStatus()
+            for(;;){
+                if(this.stopReceiptWating){
+                    break
                 }
+                await connex.thor.ticker().next()
+                await updateReceiptStatus()
             }
         })().catch(e=>{
             console.log(e)
@@ -365,9 +368,14 @@ export default class ConvertModal extends Vue {
             this.message = ''
             this.confirmCount = 0
             this.txReverted =false
+            this.checkConfirmation = true
             this.checkReceipt()
         }
     } 
+    @Watch('txID')
+    onTxIDChanged(val: number, oldVal: number){
+        console.log('tx ID updated', val, oldVal)
+    }
 
 }
 </script>
