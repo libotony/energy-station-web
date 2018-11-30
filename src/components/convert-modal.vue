@@ -4,7 +4,8 @@
         header-text-variant="light"
         v-on:hidden="onHidden"
         ref='modal'
-        hide-header-close
+        no-close-on-backdrop
+        no-close-on-esc
         centered>
         <div>
             <div class="vld-parent">
@@ -246,8 +247,6 @@ export default class ConvertModal extends Vue {
     }
     actionOK(){
         if(this.conversionStatus === ConversionStatus.Initiated){
-            // this.txID = '0xc591c7fdcefb85ccf94c597b532ac7c3df060ed7783457d0b7f57fb35cb06baa'
-            // this.checkReceipt()
             this.$emit('update:conversionStatus', ConversionStatus.Processing)
             ;(async () => {
                 const connex = window.connex
