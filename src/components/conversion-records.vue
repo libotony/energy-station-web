@@ -58,11 +58,11 @@ export default class ConversionRecords extends Vue {
     }
 
     getLastConversion = async function(){
-        let logs = await eventOfEnergyStation('Conversion')!.filter([]).order("desc").next(0, 5)
+        let logs = await eventOfEnergyStation('Conversion')!.filter([]).desc().apply(0, 5)
         let conversions: Array<ConversionEvent> = []
         for (let log of logs) {
             let item: ConversionEvent = {
-                id: log.meta.txID + log.meta.blockID
+                id: log.meta!.txID + log.meta!.blockID
             }
             if ((log.decoded as decodedReturn)['tradeType'] == '1') {
                 item.conversion = "VTHO→VET"
@@ -75,7 +75,7 @@ export default class ConversionRecords extends Vue {
             }
             item.amount = fromWeiToDisplayValue(extractValueFromDecoded(log, '_sellAmount'))
             item.converted = fromWeiToDisplayValue(extractValueFromDecoded(log, '_return'))
-            item.conversionTime = new Date(log.meta.blockTimestamp * 1000).format('yyyy-MM-dd hh:mm:ss')
+            item.conversionTime = new Date(log.meta!.blockTimestamp * 1000).format('yyyy-MM-dd hh:mm:ss')
             conversions.push(item)
         }
         return conversions.reverse()

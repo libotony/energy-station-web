@@ -256,7 +256,10 @@ export default class ConvertModal extends Vue {
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     
                     let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16))
-                    signResult = await connex.vendor.sign("tx", [{...clause, desc: `Calling convert to VTHO function`}], {summary: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`})
+                    signResult = await connex.vendor.sign("tx").message({
+                        clauses: [{...clause, comment: `Calling convert to VTHO function`}],
+                        comment: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`
+                    }).request()
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
                     const convertedVET= new BigNumber(this.toTokenValue)
@@ -267,10 +270,13 @@ export default class ConvertModal extends Vue {
 
                     let clauses = []
                     if(!this.noApprove){
-                        clauses.push({...approveClause,desc:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
+                        clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
-                    clauses.push({...convertClause, desc:'Calling convert to VET function'})
-                    signResult = await connex.vendor.sign("tx", clauses, {summary: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`})
+                    clauses.push({...convertClause, comment:'Calling convert to VET function'})
+                    signResult = await await connex.vendor.sign("tx").message({
+                        clauses,
+                        comment: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`
+                    }).request()
                 }
                 this.$emit('update:txID', signResult.txId)
                 if(this.checkConfirmation){
@@ -332,7 +338,7 @@ export default class ConvertModal extends Vue {
             if(receipt){
                 this.txReverted = receipt.reverted
                 let current = connex.thor.status.head.number
-                this.confirmCount = current - receipt.meta.blockNumber
+                this.confirmCount = current - receipt.meta!.blockNumber
                 if(this.confirmCount > 12){
                     this.actionOK()
                 }

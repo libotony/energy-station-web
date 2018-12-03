@@ -4,7 +4,7 @@ import EnergyABI from './energy.json'
 import { ABIDef, decodedReturn } from '../types'
 import {BigNumber} from 'bignumber.js'
 
-export const EnergyStationAddress = '0x9fa31d274186019EA8eF38Cd1f08b8DEe8e82939'
+export const EnergyStationAddress = '0xD015D91B42BEd5FeaF242082b11B83B431abBf4f'
 export const EnergyAddress = '0x0000000000000000000000000000456E65726779'
 
 export const methodOfEnergyStation = function (name: string): Connex.Thor.Method | null {
@@ -53,7 +53,7 @@ export const findInABI = function (name: string, abi: ABIDef) {
     return ABI;
 }
 
-export const extractValueFromDecoded = function(output: Connex.Thor.Decoded, key: string){
+export const extractValueFromDecoded = function(output: {decoded?: object|undefined}, key: string){
     return (output.decoded as decodedReturn)[key]
 }
 

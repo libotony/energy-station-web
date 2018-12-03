@@ -10,9 +10,6 @@ declare global {
         [elem: string]: any;
         }
     }
-    interface Window{
-        readonly connex: Connex
-    }
     interface Date {
         format: (f:string) => string;
     }
