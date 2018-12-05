@@ -255,28 +255,26 @@ export default class ConvertModal extends Vue {
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     
-                    let clause = methodOfEnergyStation('convertForEnergy')!.asClause([minReturn.dp(0).toString(10)],"0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16))
-                    signResult = await connex.vendor.sign("tx").message({
-                        clauses: [{...clause, comment: `Calling convert to VTHO function`}],
-                        comment: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`
-                    }).request()
+                    let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause([minReturn.dp(0).toString(10)])
+                    signResult = await connex.vendor.sign("tx").
+                        comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
+                        request([{...clause, comment: `Calling convert to VTHO function`}])
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
                     const convertedVET= new BigNumber(this.toTokenValue)
                     let minReturn = convertedVET.dividedBy(this.priceLoss/100+1)
 
-                    let convertClause = methodOfEnergyStation('convertForVET')!.asClause([amount.dp(0).toString(10), minReturn.dp(0).toString(10)], '0x0')
-                    let approveClause = methodOfEnergy('approve')!.asClause([EnergyStationAddress, amount.toString(10)], '0x0')
+                    let convertClause = methodOfEnergyStation('convertForVET')!.asClause([amount.dp(0).toString(10), minReturn.dp(0).toString(10)])
+                    let approveClause = methodOfEnergy('approve')!.asClause([EnergyStationAddress, amount.toString(10)])
 
                     let clauses = []
                     if(!this.noApprove){
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    signResult = await await connex.vendor.sign("tx").message({
-                        clauses,
-                        comment: `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`
-                    }).request()
+                    signResult = await await connex.vendor.sign("tx").
+                        comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
+                        request(clauses)
                 }
                 this.$emit('update:txID', signResult.txId)
                 if(this.checkConfirmation){

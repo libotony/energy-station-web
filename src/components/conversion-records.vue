@@ -58,7 +58,7 @@ export default class ConversionRecords extends Vue {
     }
 
     getLastConversion = async function(){
-        let logs = await eventOfEnergyStation('Conversion')!.filter([]).desc().apply(0, 5)
+        let logs = await eventOfEnergyStation('Conversion')!.filter([]).order('desc').apply(0, 5)
         let conversions: Array<ConversionEvent> = []
         for (let log of logs) {
             let item: ConversionEvent = {
