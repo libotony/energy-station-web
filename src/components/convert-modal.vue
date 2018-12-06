@@ -219,10 +219,10 @@ export default class ConvertModal extends Vue {
 
             const connex = window.connex
             if(this.conversionType === ConversionType.ToVTHO){
-                const VMOutPut = await methodOfEnergyStation('getEnergyReturn')!.call([this.fromTokenValue], 0)
+                const VMOutPut = await methodOfEnergyStation('getEnergyReturn')!.call(this.fromTokenValue)
                 this.toTokenValue = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire'))).toString(10)
             }else{
-                const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call([this.fromTokenValue], 0)
+                const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call(this.fromTokenValue)
                 this.toTokenValue = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire'))).toString(10)
             }
             this.getPriceLimit() 
@@ -255,7 +255,7 @@ export default class ConvertModal extends Vue {
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     
-                    let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause([minReturn.dp(0).toString(10)])
+                    let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
                     signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
                         request([{...clause, comment: `Calling convert to VTHO function`}])
@@ -264,8 +264,8 @@ export default class ConvertModal extends Vue {
                     const convertedVET= new BigNumber(this.toTokenValue)
                     let minReturn = convertedVET.dividedBy(this.priceLoss/100+1)
 
-                    let convertClause = methodOfEnergyStation('convertForVET')!.asClause([amount.dp(0).toString(10), minReturn.dp(0).toString(10)])
-                    let approveClause = methodOfEnergy('approve')!.asClause([EnergyStationAddress, amount.toString(10)])
+                    let convertClause = methodOfEnergyStation('convertForVET')!.asClause(amount.dp(0).toString(10), minReturn.dp(0).toString(10))
+                    let approveClause = methodOfEnergy('approve')!.asClause(EnergyStationAddress, amount.toString(10))
 
                     let clauses = []
                     if(!this.noApprove){
@@ -313,7 +313,7 @@ export default class ConvertModal extends Vue {
         }
         // TODO: need sync to implement link account
         let spender = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed'
-        let ret = await methodOfEnergy('allowance')!.call([spender, EnergyStationAddress],'0x0')
+        let ret = await methodOfEnergy('allowance')!.call(spender, EnergyStationAddress)
         const remaining  =  extractValueFromDecoded(ret, 'remaining')
         if(new BigNumber(remaining).isGreaterThanOrEqualTo(this.fromTokenValue)){
             this.showNoApproveOption = true
