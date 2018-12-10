@@ -7,7 +7,7 @@ module.exports = {
         }
     },
 
-    baseUrl: './',
+    baseUrl: process.env.NODE_ENV === 'production' ? '/energy-station/': '/',
     outputDir: undefined,
     assetsDir: undefined,
     runtimeCompiler: undefined,

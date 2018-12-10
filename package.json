@@ -11,6 +11,7 @@
     "bignumber.js": "^7.2.1",
     "bootstrap-vue": "^2.0.0-rc.11",
     "lodash.debounce": "^4.0.8",
+    "register-service-worker": "^1.5.2",
     "typescript": "^3.0.0",
     "vue": "^2.5.17",
     "vue-class-component": "^6.0.0",
@@ -25,6 +26,7 @@
     "@types/lodash.debounce": "^4.0.4",
     "@types/node": "^10.11.7",
     "@vechain/connex": "^0.2.0",
+    "@vue/cli-plugin-pwa": "^3.2.0",
     "@vue/cli-plugin-typescript": "^3.0.5",
     "@vue/cli-service": "^3.0.5"
   },
