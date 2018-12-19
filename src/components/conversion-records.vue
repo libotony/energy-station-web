@@ -48,8 +48,12 @@ export default class ConversionRecords extends Vue {
             ;(async()=>{
                 const connex = window.connex
                 for(;;){
-                    await connex.thor.ticker().next()
-                    this.conversions = await this.getLastConversion()
+                    try{
+                        await connex.thor.ticker().next()
+                        this.conversions = await this.getLastConversion()
+                    }catch(e){
+                        console.log(e)
+                    }
                 }
             })().catch(e=>{
                 console.log(e)
