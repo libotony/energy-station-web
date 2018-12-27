@@ -272,7 +272,7 @@ export default class ConvertModal extends Vue {
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    signResult = await await connex.vendor.sign("tx").
+                    signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
                         request(clauses)
                 }

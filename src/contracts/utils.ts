@@ -64,3 +64,7 @@ export const fromWeiToDisplayValue = function(input: any){
 export const fromWeiToDisplayValueWithThousandth = function (input: any) {
     return new BigNumber(input).dividedBy(1e18).dp(4).toFormat()
 }
+
+export const isBytes32 = function(val: string) {
+    return /^0x[0-9a-f]{64}$/i.test(val)
+}
