@@ -116,7 +116,6 @@ export default class ConvertModal extends Vue {
     @Prop(Number) conversionType!: ConversionType
     @Prop(Number) conversionStatus!: ConversionStatus
     @Prop(String) fromTokenValue!: string
-    @Prop(String) txID!:string
 
     // Data
     toTokenValue = '0'
@@ -130,6 +129,7 @@ export default class ConvertModal extends Vue {
     stopReceiptWating = true
     confirmCount = 0
     txReverted = false
+    txID = ''
 
     // Computed
     get fromTokenType(){
@@ -276,7 +276,7 @@ export default class ConvertModal extends Vue {
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
                         request(clauses)
                 }
-                this.$emit('update:txID', signResult.txId)
+                this.txID=signResult.txId
                 if(this.checkConfirmation){
                     this.checkReceipt()
                 }else{
@@ -322,7 +322,6 @@ export default class ConvertModal extends Vue {
         }
     }
     checkReceipt(){
-        console.log('checkReceipt')
         this.stopReceiptWating = false
         this.$emit('update:conversionStatus', ConversionStatus.Confirming)
         const connex = window.connex
@@ -341,11 +340,9 @@ export default class ConvertModal extends Vue {
                     this.actionOK()
                 }
             }
-            console.log(await tx.getReceipt())
         }
 
         ;(async()=>{
-            console.log('check txID')
             await updateReceiptStatus()
             for(;;){
                 if(this.stopReceiptWating){
@@ -375,10 +372,6 @@ export default class ConvertModal extends Vue {
             this.checkReceipt()
         }
     } 
-    @Watch('txID')
-    onTxIDChanged(val: number, oldVal: number){
-        console.log('tx ID updated', val, oldVal)
-    }
 
 }
 </script>

@@ -27,7 +27,6 @@ export default class BasicInfo extends Vue {
         if(window.connex){
             this.getInitialInfo().then(()=>{
                 this.$emit('update-status', InitStatus.Basic)
-                // throw 'e'
             }).catch((e)=>{
                 console.log(e.message)
                 this.$emit('error')
