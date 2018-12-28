@@ -116,6 +116,7 @@ export default class ConvertModal extends Vue {
     @Prop(Number) conversionType!: ConversionType
     @Prop(Number) conversionStatus!: ConversionStatus
     @Prop(String) fromTokenValue!: string
+    @Prop(String) txid!:string
 
     // Data
     toTokenValue = '0'
@@ -129,7 +130,6 @@ export default class ConvertModal extends Vue {
     stopReceiptWating = true
     confirmCount = 0
     txReverted = false
-    txID = ''
 
     // Computed
     get fromTokenType(){
@@ -202,6 +202,7 @@ export default class ConvertModal extends Vue {
         if(this.stopReceiptWating !== true){
             this.stopReceiptWating = true
         }
+        this.$emit('exit')
     }
     init(){
         (async () => {
@@ -216,6 +217,7 @@ export default class ConvertModal extends Vue {
             this.stopReceiptWating = true
             this.confirmCount = 0
             this.txReverted =false
+            this.$emit('update:txid', '')
 
             const connex = window.connex
             if(this.conversionType === ConversionType.ToVTHO){
@@ -258,6 +260,7 @@ export default class ConvertModal extends Vue {
                     let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
                     signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
+                        link(location.origin+process.env.BASE_URL+'tx-callback').
                         request([{...clause, comment: `Calling convert to VTHO function`}])
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
@@ -274,9 +277,10 @@ export default class ConvertModal extends Vue {
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
                     signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
+                        link(location.origin+process.env.BASE_URL+'tx-callback').
                         request(clauses)
                 }
-                this.txID=signResult.txId
+                this.$emit('update:txid', signResult.txId)
                 if(this.checkConfirmation){
                     this.checkReceipt()
                 }else{
@@ -327,10 +331,10 @@ export default class ConvertModal extends Vue {
         const connex = window.connex
 
         const updateReceiptStatus = async ()=>{
-            if(!this.txID){
+            if(!this.txid){
                 return
             }
-            const tx = connex.thor.transaction(this.txID)
+            const tx = connex.thor.transaction(this.txid)
             let receipt = await tx.getReceipt()
             if(receipt){
                 this.txReverted = receipt.reverted

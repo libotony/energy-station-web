@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import './registerServiceWorker'
 
 library.add(faAngleDoubleUp, faAngleDoubleDown, faCircleNotch, faCheckCircle, faInfoCircle, faTimesCircle)
-
 Vue.component('fa-i', FontAwesomeIcon)
 
 import App from './App.vue'
@@ -18,6 +17,6 @@ Vue.use(BootstrapVue)
 Vue.config.productionTip = false
 
 new Vue({
-  router,
-  render: (h) => h(App)
+    router,
+    render: (h) => h(App)
 }).$mount('#app')

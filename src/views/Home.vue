@@ -22,6 +22,7 @@
             :conversion-status.sync="conversionStatus"
             :conversion-type="conversionType"
             :from-token-value="fromTokenValue"
+            :txid.sync="txid"
             ></convert-modal>
         </div>
     </b-container>
@@ -74,6 +75,7 @@ export default class Main extends Vue {
     conversionStatus = ConversionStatus.Initial
     conversionType = ConversionType.ToVET
     fromTokenValue = '0'
+    txid=''
 
     created() {
         if (!window.connex) {
