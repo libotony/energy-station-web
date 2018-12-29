@@ -280,7 +280,7 @@ export default class ConvertModal extends Vue {
                         link(location.origin+process.env.BASE_URL+'tx-callback').
                         request(clauses)
                 }
-                this.$emit('update:txid', signResult.txId)
+                this.$emit('update:txid', signResult.txid)
                 if(this.checkConfirmation){
                     this.checkReceipt()
                 }else{
