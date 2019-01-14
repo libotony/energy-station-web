@@ -4,6 +4,14 @@
         <b-row class="mb-2">
             <b-alert
                 class="w-75 mx-auto"
+                variant="danger"
+                :show="!hasConnex"
+                dismissible
+                fade>
+                Connex not detacted, it is recommended to open in VeChain Sync. <a href="javascript:void" @click="openWithSync">Open In</a> or <a :href="syncReleaseUrl">Download</a> sync!
+            </b-alert>
+            <b-alert
+                class="w-75 mx-auto"
                 :variant="sysAlertType"
                 :show="showSystemMsg"  
                 dismissible
@@ -41,6 +49,8 @@ import BasicInfo from '../components/basic-info.vue'
 import ConvertCards from '../components/convert-cards.vue'
 import ConvertModal from '../components/convert-modal.vue'
 
+const customProtocolDetection = require('custom-protocol-detection')
+
 import {
     EnergyStationAddress,
     methodOfEnergyStation,
@@ -63,6 +73,8 @@ import {ConversionType,InitStatus, ConversionStatus} from '../types'
 })
 
 export default class Main extends Vue {
+    hasConnex = !!window.connex
+    syncReleaseUrl = 'https://github.com/vechain/thor-sync.electron/releases'
     // app level message
     systemMsg = ''
     showSystemMsg = false
@@ -77,13 +89,6 @@ export default class Main extends Vue {
     fromTokenValue = '0'
     txid=''
 
-    created() {
-        if (!window.connex) {
-            this.showSysMessage("No connex environment detacted, please download sync!", 'danger')
-            this.initErrored=true
-        }
-    }
-
     get ready(){
         return !(this.initStatus ^ InitStatus.Finish) && !this.initErrored
     }
@@ -92,10 +97,8 @@ export default class Main extends Vue {
         this.initStatus ^= value
     }
     onErrored(){
-        if(!this.initErrored){
-            this.showSysMessage('Init Failed!', 'danger')
-            this.initErrored=true
-        }
+        this.showSysMessage('Init Failed!', 'danger')
+        this.initErrored=true
     }
     onConvert(data:{
         type: ConversionType,
@@ -110,6 +113,20 @@ export default class Main extends Vue {
         this.sysAlertType = type
         this.systemMsg = msg
         this.showSystemMsg = true
+    }
+
+    openWithSync() {
+        const vechainAppUrl = 'vechain-app:///' + encodeURIComponent(window.location.href)
+        const gotoDownload = () => {
+            window.location.href = this.syncReleaseUrl
+        }
+        customProtocolDetection(vechainAppUrl, () => {
+            gotoDownload()
+        }, () => {
+            console.log('opened with sync')
+        }, () => {
+            gotoDownload()
+        })
     }
 
 }
