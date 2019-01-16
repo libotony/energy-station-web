@@ -25,7 +25,7 @@
                         <b-card class="w-100">
                             <b-container fluid> 
                                 <b-row align-h="between" @click="showAdvanced=!showAdvanced">
-                                    <b-col class="d-flex justify-content-start text-muted">ADVANCED SEETINGS</b-col>
+                                    <b-col class="d-flex justify-content-start text-muted">ADVANCED SETTINGS</b-col>
                                     <b-col class="d-flex justify-content-end text-muted"><fa-i :icon="showAdvanced?'angle-double-up':'angle-double-down'" size="lg"></fa-i></b-col>
                                 </b-row>
                                 <b-row>
@@ -284,7 +284,7 @@ export default class ConvertModal extends Vue {
                 if(this.checkConfirmation){
                     this.checkReceipt()
                 }else{
-                    this.actionShowSuccess('Trasaction addded to the queue!')
+                    this.actionShowSuccess('Transaction added to the queue!')
                 }
             })().catch(e => {
                 console.log(e)
