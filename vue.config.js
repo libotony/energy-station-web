@@ -5,6 +5,6 @@ module.exports = {
             Buffer: true
         }
     },
-    baseUrl: process.env.NODE_ENV === 'production' ? '/energy-station/': '/',
+    baseUrl: '/',
 }
 
