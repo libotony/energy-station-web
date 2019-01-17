@@ -2,7 +2,7 @@
     <b-modal title="Convert Tokens" 
         header-bg-variant="primary" 
         header-text-variant="light"
-        v-on:hidden="onHidden"
+        @:hidden="onHidden"
         ref='modal'
         no-close-on-backdrop
         no-close-on-esc
@@ -315,12 +315,10 @@ export default class ConvertModal extends Vue {
             this.showNoApproveOption = false
         }
     }
-    
     confirmThreeEvent(txReverted: boolean){
         this.confirmThree=true
         this.txReverted = txReverted
     }
-
     confirmed(){
         this.actionOK()
     }
