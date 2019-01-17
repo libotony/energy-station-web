@@ -22,7 +22,6 @@
             :conversion-status.sync="conversionStatus"
             :conversion-type="conversionType"
             :from-token-value="fromTokenValue"
-            :txid.sync="txid"
             ></convert-modal>
         </div>
     </b-container>
@@ -66,13 +65,10 @@ export default class Main extends Vue {
     isMainNet = connex.thor.genesis.id === '0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a' ? true : false
     // initiate state
     initStatus=InitStatus.Initial
-    initErrored = false
-
     // conversion popup modal
     conversionStatus = ConversionStatus.Initial
     conversionType = ConversionType.ToVET
     fromTokenValue = '0'
-    txid=''
 
     get ready(){
         return !(this.initStatus ^ InitStatus.Finish)

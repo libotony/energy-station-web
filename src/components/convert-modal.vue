@@ -69,15 +69,13 @@
                     </div>
                 </transition>
                 <transition name="move-in">
-                    <div v-show="showConfirming" key="show-confirm">
-                        <b-container fluid  class="d-flex flex-column justify-content-end" style="min-height:210px">
-                            <b-row class="mb-3">
-                                <b-col class="d-flex justify-content-center">
-                                <span>{{confirmCount}}/12  <b-badge class="status-badge" :variant="confirmCount <= 0 ?'secondary' : txReverted ? 'danger':'success'" >{{confirmCount <= 0 ?'NOT PACKED' : txReverted ? 'REVERTED':'SUCCESS'}}</b-badge></span>
-                                </b-col>
-                            </b-row>
-                        </b-container>
-                    </div>
+                    <t-x-confirm 
+                        v-if="showConfirming" 
+                        :txid="txid"
+                        @confirmThree.once="confirmThreeEvent"
+                        @confirmed="confirmed"
+                        key="show-confirm">
+                    </t-x-confirm>
                 </transition>
             </div>
         </div>
@@ -93,6 +91,8 @@ import debounce from 'lodash.debounce'
 import { BigNumber } from "bignumber.js"
 import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/vue-loading.css'
+import TXConfirm from './tx-confirm.vue'
+
 
 import {
     EnergyStationAddress,
@@ -108,7 +108,8 @@ const MIN_PRICE_LOSS = 1
 
 @Component({
     components:{
-        Loading
+        Loading,
+        TXConfirm
     }
 })
 export default class ConvertModal extends Vue {
@@ -116,7 +117,6 @@ export default class ConvertModal extends Vue {
     @Prop(Number) conversionType!: ConversionType
     @Prop(Number) conversionStatus!: ConversionStatus
     @Prop(String) fromTokenValue!: string
-    @Prop(String) txid!:string
 
     // Data
     toTokenValue = '0'
@@ -126,10 +126,10 @@ export default class ConvertModal extends Vue {
     noApprove = false
     showNoApproveOption = false
     checkConfirmation = false
+    txid = ''
     message = ''
-    stopReceiptWating = true
-    confirmCount = 0
     txReverted = false
+    confirmThree = false
 
     // Computed
     get fromTokenType(){
@@ -152,10 +152,7 @@ export default class ConvertModal extends Vue {
             case ConversionStatus.Processing:
                 return true
             case ConversionStatus.Confirming:
-                if(this.confirmCount > 3)
-                    return false
-                else
-                    return true
+                return !this.confirmThree
             default:
                 return false
         }
@@ -199,9 +196,6 @@ export default class ConvertModal extends Vue {
     }
     onHidden(){
         this.$emit('update:conversionStatus', ConversionStatus.Initial)
-        if(this.stopReceiptWating !== true){
-            this.stopReceiptWating = true
-        }
         this.$emit('exit')
     }
     init(){
@@ -214,10 +208,9 @@ export default class ConvertModal extends Vue {
             this.showNoApproveOption = false
             this.checkConfirmation = false
             this.message = ''
-            this.stopReceiptWating = true
-            this.confirmCount = 0
+            this.confirmThree=false
             this.txReverted =false
-            this.$emit('update:txid', '')
+            this.txid = ''
 
             const connex = window.connex
             if(this.conversionType === ConversionType.ToVTHO){
@@ -277,12 +270,12 @@ export default class ConvertModal extends Vue {
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
                     signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
-                        link(location.origin+process.env.BASE_URL+'tx-callback').
+                        link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}').
                         request(clauses)
                 }
-                this.$emit('update:txid', signResult.txid)
+                this.txid=signResult.txid
                 if(this.checkConfirmation){
-                    this.checkReceipt()
+                    this.$emit('update:conversionStatus', ConversionStatus.Confirming)
                 }else{
                     this.actionShowSuccess('Transaction added to the queue!')
                 }
@@ -293,9 +286,6 @@ export default class ConvertModal extends Vue {
         }else if(this.conversionStatus === ConversionStatus.Success || this.conversionStatus === ConversionStatus.Error){
             (<Element & {hide: Function}>this.$refs.modal).hide()
         }else if(this.conversionStatus === ConversionStatus.Confirming){
-            if(this.stopReceiptWating !== true){
-                this.stopReceiptWating = true
-            }
             if(this.txReverted){
                 this.actionShowError('Transaction reverted!')
             }else{
@@ -325,39 +315,14 @@ export default class ConvertModal extends Vue {
             this.showNoApproveOption = false
         }
     }
-    checkReceipt(){
-        this.stopReceiptWating = false
-        this.$emit('update:conversionStatus', ConversionStatus.Confirming)
-        const connex = window.connex
+    
+    confirmThreeEvent(txReverted: boolean){
+        this.confirmThree=true
+        this.txReverted = txReverted
+    }
 
-        const updateReceiptStatus = async ()=>{
-            if(!this.txid){
-                return
-            }
-            const tx = connex.thor.transaction(this.txid)
-            let receipt = await tx.getReceipt()
-            if(receipt){
-                this.txReverted = receipt.reverted
-                let current = connex.thor.status.head.number
-                this.confirmCount = current - receipt.meta!.blockNumber
-                if(this.confirmCount > 12){
-                    this.actionOK()
-                }
-            }
-        }
-
-        ;(async()=>{
-            await updateReceiptStatus()
-            for(;;){
-                if(this.stopReceiptWating){
-                    break
-                }
-                await connex.thor.ticker().next()
-                await updateReceiptStatus()
-            }
-        })().catch(e=>{
-            console.log(e)
-        })
+    confirmed(){
+        this.actionOK()
     }
 
     // Watcher
@@ -366,14 +331,6 @@ export default class ConvertModal extends Vue {
         if(val===ConversionStatus.Start && oldVal === ConversionStatus.Initial){
             (<Element & {show: Function}>this.$refs.modal).show()
             this.init()
-        }
-        if(val===ConversionStatus.Confirming && oldVal === ConversionStatus.Initial){
-            (<Element & {show: Function}>this.$refs.modal).show()
-            this.message = ''
-            this.confirmCount = 0
-            this.txReverted =false
-            this.checkConfirmation = true
-            this.checkReceipt()
         }
     } 
 

@@ -12,7 +12,7 @@
                 <p class="mt-4 mb-4">
                     It is recommended to open in <b>VeChain Sync</b>.
                 </p>
-                <b-btn variant="primary" size="sm" @click="openWithSync">Open in</b-btn> or <b-link :href="syncReleaseUrl">download</b-link> VeChain Sync.
+                <b-btn variant="primary" size="sm" @click="openWithSync">Open in</b-btn> or <b-link :href="syncReleaseUrl">Download</b-link> VeChain Sync.
             </b-jumbotron>
         </b-container>
         
