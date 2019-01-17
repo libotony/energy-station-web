@@ -7,33 +7,18 @@ Vue.use(Router)
 
 const router = new Router({
     base: process.env.BASE_URL,
-    mode: 'history',
+    mode: 'hash',
     routes: [
         {
             path: '/',
             name: 'Home',
             component: Home
         }, {
-            path: '/tx-callback',
+            path: '/tx-callback/:txid',
             name: 'TXCallBack',
             component: TXCallBack,
-        }, {
-            path: '*',
-            name: 'Fallback',
-            redirect: '/'
         }
     ]
 })
-
-// router.beforeEach((to, _, next) => {
-//     debugger
-//     if (to.query['txid']) {
-//         console.log('match')
-//         next(`/tx-callback/${to.query.txid}`)
-//     } else {
-//         next()
-//     }
-
-// })
 
 export default router
