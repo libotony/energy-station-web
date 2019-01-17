@@ -260,7 +260,7 @@ export default class ConvertModal extends Vue {
                     let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
                     signResult = await connex.vendor.sign("tx").
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
-                        link(location.origin+process.env.BASE_URL+'tx-callback').
+                        link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}').
                         request([{...clause, comment: `Calling convert to VTHO function`}])
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
