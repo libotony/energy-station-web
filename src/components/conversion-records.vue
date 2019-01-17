@@ -11,6 +11,7 @@ import { Component, Vue, Watch, Prop } from "vue-property-decorator"
 import { ConversionEvent, decodedReturn, InitStatus } from '@/types'
 import {eventOfEnergyStation, extractValueFromDecoded, fromWeiToDisplayValue} from '../contracts'
 import { BigNumber } from 'bignumber.js'
+import { EventBus } from '../eventbus'
 
 @Component
 export default class ConversionRecords extends Vue {
@@ -37,28 +38,14 @@ export default class ConversionRecords extends Vue {
     conversions: Array<ConversionEvent> = []
 
     created(){
-        if(window.connex){
-            this.getLastConversion().then((conversions)=>{
-                this.conversions = conversions
-                this.$emit('update-status', InitStatus.List)
-            }).catch((e)=>{
-                console.log(e.message)
-                this.$emit('error')
-            })
-            ;(async()=>{
-                const connex = window.connex
-                for(;;){
-                    try{
-                        await connex.thor.ticker().next()
-                        this.conversions = await this.getLastConversion()
-                    }catch(e){
-                        console.log(e)
-                    }
-                }
-            })().catch(e=>{
-                console.log(e)
-            })
-        }
+        this.updateRecord().then(()=>{
+            this.$emit('update-status', InitStatus.List)
+        })
+        EventBus.$on('tick', this.updateRecord)
+    }
+
+    beforeDestroy(){
+         EventBus.$off('tick', this.updateRecord)
     }
 
     getLastConversion = async function(){
@@ -83,6 +70,14 @@ export default class ConversionRecords extends Vue {
             conversions.push(item)
         }
         return conversions.reverse()
+    }
+
+    updateRecord(){
+        return this.getLastConversion().then((conversions)=>{
+            this.conversions = conversions
+        }).catch((e)=>{
+            console.log(e.message)
+        })
     }
 
 }

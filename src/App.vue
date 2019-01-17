@@ -21,6 +21,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator"
+import { EventBus } from './eventbus'
 
 const customProtocolDetection = require('custom-protocol-detection')
 
@@ -42,5 +43,21 @@ export default class App extends Vue {
             gotoDownload()
         })
     }
+}
+
+if(window.connex){
+    ;(async()=>{
+        const connex = window.connex
+        for(;;){
+            try{
+                await connex.thor.ticker().next()
+                EventBus.$emit('tick')
+            }catch(e){
+                console.log(e)
+            }
+        }
+    })().catch(e=>{
+        console.log(e)
+    })
 }
 </script>
