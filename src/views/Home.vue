@@ -1,22 +1,22 @@
 <template>
   <div id="app">
-    <b-container class="pt-2">
-        <b-row class="mb-2">
+    <b-container class="mt-2">
+        <b-row>
             <b-alert
-                class="w-75 mx-auto"
-                :variant="sysAlertType"
-                :show="showSystemMsg"  
+                class="w-75 mx-auto mb-0"
+                variant="warning"
+                :show="isMainNet"  
                 dismissible
                 fade>
-                {{systemMsg}}
+                EnergyStation is not deployed to the mainnet yet!
             </b-alert>
         </b-row>
     </b-container>
-    <b-container class="pt-4">
+    <b-container class="mt-2">
         <div class="vld-parent">
             <loading :active="!ready" :is-full-page="false" color="#007bff" :opacity="0.6"></loading>
-            <basic-info v-on:update-status="onUpdateInitStatus" v-on:error="onErrored"></basic-info>
-            <conversion-records v-on:update-status="onUpdateInitStatus" v-on:error="onErrored"> </conversion-records>
+            <basic-info v-on:update-status="onUpdateInitStatus"></basic-info>
+            <conversion-records v-on:update-status="onUpdateInitStatus"> </conversion-records>
             <convert-cards v-on:convert="onConvert"></convert-cards>
             <convert-modal 
             :conversion-status.sync="conversionStatus"
@@ -63,10 +63,7 @@ import {ConversionType,InitStatus, ConversionStatus} from '../types'
 })
 
 export default class Main extends Vue {
-    // app level message
-    systemMsg = ''
-    showSystemMsg = false
-    sysAlertType = 'primary'
+    isMainNet = connex.thor.genesis.id === '0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a' ? true : false
     // initiate state
     initStatus=InitStatus.Initial
     initErrored = false
@@ -78,16 +75,13 @@ export default class Main extends Vue {
     txid=''
 
     get ready(){
-        return !(this.initStatus ^ InitStatus.Finish) && !this.initErrored
+        return !(this.initStatus ^ InitStatus.Finish)
     }
 
     onUpdateInitStatus(value:number){
         this.initStatus ^= value
     }
-    onErrored(){
-        this.showSysMessage('Init Failed!', 'danger')
-        this.initErrored=true
-    }
+
     onConvert(data:{
         type: ConversionType,
         value: string
@@ -95,12 +89,6 @@ export default class Main extends Vue {
         this.conversionType = data.type
         this.fromTokenValue = data.value
         this.conversionStatus = ConversionStatus.Start
-    }
-
-    showSysMessage(msg:string, type: 'primary'|'success'|'danger' = 'danger'){
-        this.sysAlertType = type
-        this.systemMsg = msg
-        this.showSystemMsg = true
     }
 
 }

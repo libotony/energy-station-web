@@ -24,14 +24,11 @@ export default class BasicInfo extends Vue {
     }
 
     created(){
-        if(window.connex){
-            this.getInitialInfo().then(()=>{
-                this.$emit('update-status', InitStatus.Basic)
-            }).catch((e)=>{
-                console.log(e.message)
-                this.$emit('error')
-            })
-        }
+        this.getInitialInfo().then(()=>{
+            this.$emit('update-status', InitStatus.Basic)
+        }).catch((e)=>{
+            console.log(e.message)
+        })
     }
 
     async getInitialInfo(){
