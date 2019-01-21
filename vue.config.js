@@ -6,5 +6,10 @@ module.exports = {
         }
     },
     baseUrl: '/',
+    pwa: {
+        workboxOptions: {
+            navigateFallback: '/'
+        }
+    }
 }
 
