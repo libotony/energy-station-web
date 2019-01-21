@@ -1,6 +1,6 @@
 <template>
     <b-row class="mb-3">
-        <b-card bg-variant="light" class="w-75 mx-auto" title="EnergyStaion Info">
+        <b-card bg-variant="light" class="w-75 mx-auto" title="META INFO">
             <b-table stacked small :items="[basicInfo]" class="w-100 info"></b-table>
         </b-card>
     </b-row>
@@ -16,10 +16,10 @@ import { BigNumber } from 'bignumber.js'
 export default class BasicInfo extends Vue {
     // basic info 
     basicInfo = {
-        EnergyStationAddress,
-        'VET Balance': '-',
-        'VTHO Balance': '-',
-        'Conversion Rate':'-',
+        'Contract Address': EnergyStationAddress,
+        'VET Supply': '-',
+        'VTHO Supply': '-',
+        'Fee Rate':'-',
         Owner: '-'
     }
 
@@ -34,11 +34,11 @@ export default class BasicInfo extends Vue {
     async getInitialInfo(){
         let connex = window.connex;
         let ret = await methodOfEnergyStation('vetVirtualBalance')!.call([], 0)
-        this.basicInfo['VET Balance'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
+        this.basicInfo['VET Supply'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
         ret = await methodOfEnergyStation('energyVirtualBalance')!.call([], 0)        
-        this.basicInfo['VTHO Balance'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
+        this.basicInfo['VTHO Supply'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
         ret = await methodOfEnergyStation('conversionFee')!.call([], 0)
-        this.basicInfo['Conversion Rate'] = extractValueFromDecoded(ret, '0')/10000 + '%'
+        this.basicInfo['Fee Rate'] = extractValueFromDecoded(ret, '0')/10000 + '%'
         ret = await methodOfEnergyStation('owner')!.call([], 0)  
         this.basicInfo['Owner'] = extractValueFromDecoded(ret, '0')
     }

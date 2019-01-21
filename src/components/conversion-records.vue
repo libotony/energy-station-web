@@ -1,6 +1,6 @@
 <template>
     <b-row class="mb-3">
-        <b-card bg-variant="light" class="w-75 mx-auto" title="Latest conversions">
+        <b-card bg-variant="light" class="w-75 mx-auto" title="CONVERSION RECORD">
             <b-table striped boarderd outlined small responsive :items="conversions" :fields="tableFields"></b-table>
         </b-card>
     </b-row>
@@ -23,10 +23,10 @@ export default class ConversionRecords extends Vue {
             label: 'Amount'
         },
         converted:{
-            label: 'Conveted'
+            label: 'Received'
         },
         rate:{
-            label: 'Rate(VTHO/VET)'
+            label: 'VTHO/VET'
         },
         conversionTime:{
             label: 'Time'
