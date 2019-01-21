@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
     <b-container class="mt-2">
         <b-row>
             <b-alert
