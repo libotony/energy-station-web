@@ -15,13 +15,13 @@
     <b-container class="mt-2">
         <div class="vld-parent">
             <loading :active="!ready" :is-full-page="false" color="#007bff" :opacity="0.6"></loading>
+            <conversion-records v-on:update-status="onUpdateInitStatus"> </conversion-records>
             <convert-cards v-on:convert="onConvert"></convert-cards>
             <convert-modal 
             :conversion-status.sync="conversionStatus"
             :conversion-type="conversionType"
             :from-token-value="fromTokenValue"
             ></convert-modal>
-            <conversion-records v-on:update-status="onUpdateInitStatus"> </conversion-records>
             <basic-info v-on:update-status="onUpdateInitStatus"></basic-info>
         </div>
     </b-container>
