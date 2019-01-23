@@ -1,9 +1,7 @@
 <template>
     <div id="app">
         <span id="forkongithub"><a href="https://github.com/libotony/energy-station">Fork me on GitHub</a></span>
-        <b-navbar type="dark" variant="primary" toggleable>
-            <b-navbar-brand to="/">EnergyStation</b-navbar-brand>
-        </b-navbar>
+        <nav-bar/>
 
         <router-view v-if="hasConnex"></router-view>
 
@@ -14,21 +12,39 @@
                     It is recommended to open in <b>VeChain Sync</b>.
                 </p>
                 <b-btn variant="primary" size="sm" @click="openWithSync">Open in</b-btn> or <b-link :href="syncReleaseUrl">Download</b-link> VeChain Sync.
-            </b-jumbotron>
+            </b-jumbotron> 
         </b-container>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator"
+import { picasso } from '@vechain/picasso'
 import { EventBus } from './eventbus'
+import { store } from './store'
+import NavBar from './components/nav-bar.vue'
 
 const customProtocolDetection = require('custom-protocol-detection')
 
-@Component
+@Component({
+    components:{
+        NavBar
+    }
+})
 export default class App extends Vue {
     hasConnex = !!window.connex
     syncReleaseUrl = 'https://github.com/vechain/thor-sync.electron/releases'
+
+    created(){
+        const data = sessionStorage.getItem('linked-addr');
+        if(!!data){
+            if(/^0x[0-9a-fA-F]{40}$/i.test(data)){
+                store.setLinkedAddrAction(data)
+            }else{
+                sessionStorage.removeItem('linked-addr');
+            }
+        }
+    }
 
     openWithSync() {
         const vechainAppUrl = 'vechain-app:///' + encodeURIComponent(window.location.href)
@@ -108,7 +124,7 @@ body::-webkit-scrollbar {
         width: 200px;
         overflow: hidden;
         height: 200px;
-        z-index: 9999;
+        z-index: 1;
     }
     #forkongithub a {
         width: 300px;
@@ -121,6 +137,11 @@ body::-webkit-scrollbar {
         -moz-transform: rotate(45deg);
         -o-transform: rotate(45deg);
         box-shadow: 2px 2px 5px rgba(66, 185, 131, 0.8);
+    }
+}
+@media screen and (max-width: 800px) {
+    #forkongithub {
+        display: none;
     }
 }
 </style>

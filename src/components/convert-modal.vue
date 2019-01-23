@@ -103,6 +103,7 @@ import {
     extractValueFromDecoded
 } from "../contracts"
 import {ConversionType, ConversionStatus} from '../types'
+import { store } from '../store'
 
 const MIN_PRICE_LOSS = 1
 
@@ -130,6 +131,8 @@ export default class ConvertModal extends Vue {
     message = ''
     txReverted = false
     confirmThree = false
+    // simple store
+    sharedStore = store.state
 
     // Computed
     get fromTokenType(){
@@ -221,7 +224,7 @@ export default class ConvertModal extends Vue {
                 this.toTokenValue = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire'))).toString(10)
             }
             this.getPriceLimit() 
-            // await this.checkApproval()
+            await this.checkApproval()
         })().then(()=>{
             this.$emit('update:conversionStatus', ConversionStatus.Initiated)
         }).catch((e)=>{
@@ -305,9 +308,8 @@ export default class ConvertModal extends Vue {
         if(this.conversionType !== ConversionType.ToVET){
             return
         }
-        // TODO: need sync to implement link account
-        let spender = '0x7567d83b7b8d80addcb281a71d54fc7b3364ffed'
-        let ret = await methodOfEnergy('allowance')!.call(spender, EnergyStationAddress)
+        let allower = this.sharedStore.linkedAddr
+        let ret = await methodOfEnergy('allowance')!.call(allower, EnergyStationAddress)
         const remaining  =  extractValueFromDecoded(ret, 'remaining')
         if(new BigNumber(remaining).isGreaterThanOrEqualTo(this.fromTokenValue)){
             this.showNoApproveOption = true
