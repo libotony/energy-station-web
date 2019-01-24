@@ -247,16 +247,19 @@ export default class ConvertModal extends Vue {
         if(this.conversionStatus === ConversionStatus.Initiated){
             this.$emit('update:conversionStatus', ConversionStatus.Processing)
             ;(async () => {
-                const connex = window.connex
+                const signer = window.connex.vendor.sign("tx")
+                signer.link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}')
+                if(this.sharedStore.linkedAddr){
+                    signer.signer(this.sharedStore.linkedAddr)
+                }
                 let signResult
                 if(this.conversionType === ConversionType.ToVTHO){
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     
                     let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
-                    signResult = await connex.vendor.sign("tx").
+                    signResult = await signer.
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
-                        link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}').
                         request([{...clause, comment: `Calling convert to VTHO function`}])
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
@@ -271,9 +274,8 @@ export default class ConvertModal extends Vue {
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    signResult = await connex.vendor.sign("tx").
+                    signResult = await signer.
                         comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
-                        link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}').
                         request(clauses)
                 }
                 this.txid=signResult.txid
