@@ -5,8 +5,7 @@
             <b-alert
                 class="w-75 mx-auto mb-0"
                 variant="warning"
-                :show="isMainNet"  
-                dismissible
+                :show="isMainNet"
                 fade>
                 EnergyStation is not deployed to the mainnet yet!
             </b-alert>

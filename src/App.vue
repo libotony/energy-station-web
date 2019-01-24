@@ -121,16 +121,16 @@ body::-webkit-scrollbar {
         display: block;
         top: 0;
         right: 0;
-        width: 200px;
+        width: 165px;
         overflow: hidden;
-        height: 200px;
-        z-index: 1;
+        height: 165px;
+        z-index: 2;
     }
     #forkongithub a {
-        width: 300px;
+        width: 250px;
         position: absolute;
-        top: 60px;
-        right: -80px;
+        top: 45px;
+        right: -60px;
         transform: rotate(45deg);
         -webkit-transform: rotate(45deg);
         -ms-transform: rotate(45deg);
