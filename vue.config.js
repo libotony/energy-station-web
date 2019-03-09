@@ -8,7 +8,6 @@ module.exports = {
     baseUrl: '/',
     pwa: {
         workboxOptions: {
-            navigateFallback: '/404.html',
             skipWaiting: true,
             clientsClaim: true
         }
