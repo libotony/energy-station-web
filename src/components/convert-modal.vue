@@ -310,6 +310,9 @@ export default class ConvertModal extends Vue {
         if(this.conversionType !== ConversionType.ToVET){
             return
         }
+        if(!this.sharedStore.linkedAddr){
+            return
+        }
         let allower = this.sharedStore.linkedAddr
         let ret = await methodOfEnergy('allowance')!.call(allower, EnergyStationAddress)
         const remaining  =  extractValueFromDecoded(ret, 'remaining')
