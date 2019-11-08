@@ -10,7 +10,7 @@
                                 class="mb-0">
                     <b-form-group horizontal>
                         <b-input-group>
-                            <b-form-input type="number" v-model="VET2VTHO" :formatter="formatUnsigedInt" @input="calcVTHOReturn"></b-form-input>
+                            <b-form-input type="number" v-model="VET2VTHO" :formatter="formatUnsignedInt" @input="calcVTHOReturn"></b-form-input>
                         </b-input-group> 
                     </b-form-group>
                     <b-form-group horizontal>
@@ -34,7 +34,7 @@
                                 class="mb-0">
                     <b-form-group horizontal>
                         <b-input-group>
-                            <b-form-input type="number" v-model="VTHO2VET" :formatter="formatUnsigedInt" @input="calcVETReturn"></b-form-input>   
+                            <b-form-input type="number" v-model="VTHO2VET" :formatter="formatUnsignedInt" @input="calcVETReturn"></b-form-input>   
                         </b-input-group> 
                     </b-form-group>
                     <b-form-group horizontal>
@@ -65,8 +65,8 @@ const MIN_PRICE_LOSS = 2
 
 @Component
 export default class ConvertCards extends Vue {
-    VET2VTHO = '0'
-    VTHO2VET = '0'
+    VET2VTHO: string|null = null
+    VTHO2VET: string|null= null
     convertedVTHO = '0'
     convertedVET = '0'
     calcedVET = new BigNumber(0)
@@ -95,23 +95,24 @@ export default class ConvertCards extends Vue {
             this.convertedVET = fromWeiToDisplayValue(this.calcedVET)
         })
     }
-    formatUnsigedInt(input: string){
+    formatUnsignedInt(input: string){
         if(!isNaN(parseInt(input)) && parseInt(input)>= 0){
-            return parseInt(input)
+            const num =  parseInt(input)
+            return num > 0? num.toString(): null
         }else{
-            return '0'
+            return null
         }
     }
     proceedForEnergy(){
         this.$emit('convert', {
             type: ConversionType.ToVTHO,
-            value: new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)
+            value: new BigNumber(this.VET2VTHO!).multipliedBy(1e18).dp(0).toString(10)
         })
     }
     proceedForVET(){
         this.$emit('convert', {
             type: ConversionType.ToVET,
-            value: new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)
+            value: new BigNumber(this.VTHO2VET!).multipliedBy(1e18).dp(0).toString(10)
         })
     }
 }
