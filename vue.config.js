@@ -5,7 +5,7 @@ module.exports = {
             Buffer: true
         }
     },
-    baseUrl: '/',
+    publicPath: '/',
     pwa: {
         workboxOptions: {
             skipWaiting: true,

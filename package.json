@@ -30,8 +30,8 @@
     "@types/node": "^10.11.7",
     "@vechain/connex": "^0.6.0",
     "@vue/cli-plugin-pwa": "^3.2.0",
-    "@vue/cli-plugin-typescript": "^3.0.5",
-    "@vue/cli-service": "^3.0.5",
+    "@vue/cli-plugin-typescript": "^3.12.1",
+    "@vue/cli-service": "^4.0.5",
     "webpack-dev-server": "^3.1.14"
   },
   "postcss": {
