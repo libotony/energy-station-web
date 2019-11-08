@@ -13,6 +13,7 @@
     "bootstrap-vue": "^2.0.0-rc.11",
     "lodash.debounce": "^4.0.8",
     "register-service-worker": "^1.5.2",
+    "thor-devkit": "^1.2.2",
     "typescript": "^3.0.0",
     "vue": "^2.5.17",
     "vue-class-component": "^6.0.0",

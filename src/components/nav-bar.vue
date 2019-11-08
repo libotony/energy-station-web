@@ -56,6 +56,7 @@ import { Component, Vue, Watch, Prop } from "vue-property-decorator"
 import { store } from '../store'
 import { picasso } from '@vechain/picasso';
 import { VueClass } from 'vue-class-component/lib/declarations';
+import { Certificate } from 'thor-devkit'
 
 @Component
 export default class NavBar extends Vue {
@@ -91,14 +92,22 @@ export default class NavBar extends Vue {
             }
 
             const signingService = window.connex.vendor.sign('cert')
-            signingService.request({
+            const cert: Connex.Vendor.SigningService.CertMessage = {
                 purpose: 'identification',
                 payload: {
                     type: 'text',
                     content: 'EnergyStation is requesting your identification with random string, choose the wallet you want to link.\r\n\r\nRandom challenge: ' + random
                 }
-            }).then(result=>{
+            }
+            signingService.request(cert).then(result=>{
                 store.setLinkedAddrAction(result.annex.signer)
+                Certificate.verify({
+                    ...cert,
+                    domain: result.annex.domain,
+                    timestamp: result.annex.timestamp,
+                    signer: result.annex.signer,
+                    signature: result.signature
+                })
                 sessionStorage.setItem('linked-addr', result.annex.signer)
                 ;(<Element & {hide: Function}>this.$refs.link).hide()
             }).catch(err=>{
