@@ -60,7 +60,7 @@ import { Certificate } from 'thor-devkit'
 
 @Component
 export default class NavBar extends Vue {
-    hasConnex = !!window.connex
+    hasConnex = !!window._connex
     sharedStore = store.state
     errMsg=''
 
@@ -91,15 +91,15 @@ export default class NavBar extends Vue {
                 random += ('0' + arr[i].toString(16)).slice(-2)
             }
 
-            const signingService = window.connex.vendor.sign('cert')
-            const cert: Connex.Vendor.SigningService.CertMessage = {
+            const cert: Connex.Vendor.CertMessage = {
                 purpose: 'identification',
                 payload: {
                     type: 'text',
                     content: 'EnergyStation is requesting your identification with random string, choose the wallet you want to link.\r\n\r\nRandom challenge: ' + random
                 }
             }
-            signingService.request(cert).then(result=>{
+            const signingService = window._connex.vendor.sign('cert', cert)
+            signingService.request().then(result=>{
                 store.setLinkedAddrAction(result.annex.signer)
                 Certificate.verify({
                     ...cert,

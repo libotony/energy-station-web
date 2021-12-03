@@ -36,6 +36,7 @@ export default class TXConfirm extends Vue {
     }
 
     updateReceipt(){
+        const connex = window._connex
         ;(async()=>{
             const tx = connex.thor.transaction(this.txid)
             let receipt = await tx.getReceipt()
