@@ -7,10 +7,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator"
-import { ConversionEvent, decodedReturn, InitStatus } from '@/types'
-import {eventOfEnergyStation, extractValueFromDecoded, fromWeiToDisplayValue,EnergyStationAddress, methodOfEnergyStation} from '../contracts'
-import { BigNumber } from 'bignumber.js'
+import { Component, Vue } from "vue-property-decorator"
+import { InitStatus } from '@/types'
+import { extractValueFromDecoded, fromWeiToDisplayValue,EnergyStationAddress, methodOfEnergyStation} from '../contracts'
 
 @Component
 export default class BasicInfo extends Vue {
@@ -32,7 +31,6 @@ export default class BasicInfo extends Vue {
     }
 
     async getInitialInfo(){
-        let connex = window.connex;
         let ret = await methodOfEnergyStation('vetVirtualBalance')!.call()
         this.basicInfo['VET Supply'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
         ret = await methodOfEnergyStation('energyVirtualBalance')!.call()        

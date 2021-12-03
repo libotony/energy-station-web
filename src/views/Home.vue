@@ -39,15 +39,6 @@ import BasicInfo from '../components/basic-info.vue'
 import ConvertCards from '../components/convert-cards.vue'
 import ConvertModal from '../components/convert-modal.vue'
 
-import {
-    EnergyStationAddress,
-    methodOfEnergyStation,
-    eventOfEnergyStation,
-    methodOfEnergy,
-    eventOfEnergy,
-    extractValueFromDecoded,
-    fromWeiToDisplayValue
-} from "../contracts"
 import {ConversionType,InitStatus, ConversionStatus} from '../types'
 
 @Component({
@@ -61,7 +52,7 @@ import {ConversionType,InitStatus, ConversionStatus} from '../types'
 })
 
 export default class Main extends Vue {
-    isMainNet = connex.thor.genesis.id === '0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a' ? true : false
+    isMainNet = window._connex.thor.genesis.id === '0x00000000851caf3cfdb6e899cf5958bfb1ac3413d346d43539627e6be7ec1b4a' ? true : false
     // initiate state
     initStatus=InitStatus.Initial
     // conversion popup modal

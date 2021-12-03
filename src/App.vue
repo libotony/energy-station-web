@@ -31,24 +31,24 @@ export default class App extends Vue {
                 sessionStorage.removeItem('linked-addr');
             }
         }
+
+        ;(async()=>{
+            const connex = window._connex
+            const ticker = connex.thor.ticker()
+            for(;;){
+                try{
+                    await ticker.next()
+                    EventBus.$emit('tick')
+                }catch(e){
+                    console.log(e)
+                }
+            }
+        })().catch(e=>{
+            console.log(e)
+        })
     }
 
 }
-
-
-;(async()=>{
-    const connex = window.connex
-    for(;;){
-        try{
-            await connex.thor.ticker().next()
-            EventBus.$emit('tick')
-        }catch(e){
-            console.log(e)
-        }
-    }
-})().catch(e=>{
-    console.log(e)
-})
 
 </script>
 

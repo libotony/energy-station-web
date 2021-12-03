@@ -7,33 +7,33 @@ import {BigNumber} from 'bignumber.js'
 export const EnergyStationAddress = '0xD015D91B42BEd5FeaF242082b11B83B431abBf4f'
 export const EnergyAddress = '0x0000000000000000000000000000456E65726779'
 
-export const methodOfEnergyStation = function (name: string): Connex.Thor.Method | null {
-    if (window.connex) {
-        let contract = window.connex.thor.account(EnergyStationAddress)
+export const methodOfEnergyStation = function (name: string): Connex.Thor.Account.Method | null {
+    if (window._connex) {
+        let contract = window._connex.thor.account(EnergyStationAddress)
         return contract.method(findInABI(name, EnergyStationABI))
     }
     return null
 }
 
-export const eventOfEnergyStation = function (name: string): Connex.Thor.EventVisitor | null {
-    if (window.connex) {
-        let contract = window.connex.thor.account(EnergyStationAddress)
+export const eventOfEnergyStation = function (name: string): Connex.Thor.Account.Event | null {
+    if (window._connex) {
+        let contract = window._connex.thor.account(EnergyStationAddress)
         return contract.event(findInABI(name, EnergyStationABI))
     }
     return null
 }
 
-export const methodOfEnergy = function (name: string): Connex.Thor.Method | null {
-    if (window.connex) {
-        let contract = window.connex.thor.account(EnergyAddress)
+export const methodOfEnergy = function (name: string): Connex.Thor.Account.Method | null {
+    if (window._connex) {
+        let contract = window._connex.thor.account(EnergyAddress)
         return contract.method(findInABI(name, EnergyABI))
     }
     return null
 }
 
-export const eventOfEnergy = function (name: string): Connex.Thor.EventVisitor | null {
-    if (window.connex) {
-        let contract = window.connex.thor.account(EnergyAddress)
+export const eventOfEnergy = function (name: string): Connex.Thor.Account.Event | null {
+    if (window._connex) {
+        let contract = window._connex.thor.account(EnergyAddress)
         return contract.event(findInABI(name, EnergyABI))
     }
     return null
