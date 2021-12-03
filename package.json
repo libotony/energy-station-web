@@ -28,7 +28,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.2",
     "@types/lodash.debounce": "^4.0.4",
     "@types/node": "^10.11.7",
-    "@vechain/connex": "^0.6.0",
+    "@vechain/connex": "^2.0.7",
     "@vue/cli-plugin-pwa": "^3.2.0",
     "@vue/cli-plugin-typescript": "^3.12.1",
     "@vue/cli-service": "^4.0.5",
