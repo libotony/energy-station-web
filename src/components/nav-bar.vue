@@ -98,20 +98,22 @@ export default class NavBar extends Vue {
                     content: 'EnergyStation is requesting your identification with random string, choose the wallet you want to link.\r\n\r\nRandom challenge: ' + random
                 }
             }
-            const signingService = window._connex.vendor.sign('cert', cert)
-            signingService.request().then(result=>{
-                store.setLinkedAddrAction(result.annex.signer)
-                Certificate.verify({
-                    ...cert,
-                    domain: result.annex.domain,
-                    timestamp: result.annex.timestamp,
-                    signer: result.annex.signer,
-                    signature: result.signature
-                })
-                sessionStorage.setItem('linked-addr', result.annex.signer)
-                ;(<Element & {hide: Function}>this.$refs.link).hide()
-            }).catch(err=>{
-                this.errMsg = err.toString()
+            window._connex
+                .vendor
+                .sign('cert', cert)
+                .request().then(result=>{
+                    store.setLinkedAddrAction(result.annex.signer)
+                    Certificate.verify({
+                        ...cert,
+                        domain: result.annex.domain,
+                        timestamp: result.annex.timestamp,
+                        signer: result.annex.signer,
+                        signature: result.signature
+                    })
+                    sessionStorage.setItem('linked-addr', result.annex.signer)
+                    ;(<Element & {hide: Function}>this.$refs.link).hide()
+                }).catch(err=>{
+                    this.errMsg = err.toString()
             })
         }
     }
