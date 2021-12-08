@@ -249,18 +249,24 @@ export default class ConvertModal extends Vue {
             ;(async () => {
 
                 let signResult
+                let signer: string|null =null
+                const linkUrl = location.origin+process.env.BASE_URL+'#/tx-callback/{txid}'
+
+                if(this.sharedStore.linkedAddr){
+                    signer = this.sharedStore.linkedAddr
+                }
+
                 if(this.conversionType === ConversionType.ToVTHO){
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
-                    const signer = window._connex.vendor.sign("tx", [{...clause, comment: `Calling convert to VTHO function`}])
-                    signer.link(location.origin+process.env.BASE_URL+'#/tx-callback/{txid}')
-                    if(this.sharedStore.linkedAddr){
-                        signer.signer(this.sharedStore.linkedAddr)
-                    }
-                    signResult = await signer.
-                        comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`).
-                        request()
+                    const signing = window._connex.vendor
+                        .sign("tx", [{...clause, comment: `Calling convert to VTHO function`}])
+                        .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`)
+                        .link(linkUrl)
+                    if(signer) signing.signer(signer)
+                    
+                    signResult = await signing.request()
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
                     const convertedVET= new BigNumber(this.toTokenValue)
@@ -274,9 +280,13 @@ export default class ConvertModal extends Vue {
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    signResult = await window._connex.vendor.sign("tx", clauses).
-                        comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`).
-                        request()
+                    const signing = window._connex.vendor
+                        .sign("tx", clauses)
+                        .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`)
+                        .link(linkUrl)
+                    if(signer) signing.signer(signer)
+
+                    signResult = await signing.request()
                 }
                 this.txid = signResult.txid
                 if(this.checkConfirmation){
