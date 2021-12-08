@@ -3,40 +3,25 @@ import EnergyStationABI from './energy-station.json'
 import EnergyABI from './energy.json'
 import { ABIDef, decodedReturn } from '../types'
 import {BigNumber} from 'bignumber.js'
+import { Connex } from '@vechain/connex'
 
 export const EnergyStationAddress = '0xD015D91B42BEd5FeaF242082b11B83B431abBf4f'
 export const EnergyAddress = '0x0000000000000000000000000000456E65726779'
 
-export const methodOfEnergyStation = function (name: string): Connex.Thor.Account.Method | null {
-    if (window._connex) {
-        let contract = window._connex.thor.account(EnergyStationAddress)
-        return contract.method(findInABI(name, EnergyStationABI))
-    }
-    return null
+export const methodOfEnergyStation = function (name: string, thor: Connex.Thor): Connex.Thor.Account.Method {
+    return thor.account(EnergyStationAddress).method(findInABI(name, EnergyStationABI))
 }
 
-export const eventOfEnergyStation = function (name: string): Connex.Thor.Account.Event | null {
-    if (window._connex) {
-        let contract = window._connex.thor.account(EnergyStationAddress)
-        return contract.event(findInABI(name, EnergyStationABI))
-    }
-    return null
+export const eventOfEnergyStation = function (name: string, thor: Connex.Thor): Connex.Thor.Account.Event {
+    return thor.account(EnergyStationAddress).event(findInABI(name, EnergyStationABI))
 }
 
-export const methodOfEnergy = function (name: string): Connex.Thor.Account.Method | null {
-    if (window._connex) {
-        let contract = window._connex.thor.account(EnergyAddress)
-        return contract.method(findInABI(name, EnergyABI))
-    }
-    return null
+export const methodOfEnergy = function (name: string, thor: Connex.Thor): Connex.Thor.Account.Method {
+    return thor.account(EnergyAddress).method(findInABI(name, EnergyABI))
 }
 
-export const eventOfEnergy = function (name: string): Connex.Thor.Account.Event | null {
-    if (window._connex) {
-        let contract = window._connex.thor.account(EnergyAddress)
-        return contract.event(findInABI(name, EnergyABI))
-    }
-    return null
+export const eventOfEnergy = function (name: string, thor: Connex.Thor): Connex.Thor.Account.Event {
+    return thor.account(EnergyAddress).event(findInABI(name, EnergyABI))
 }
 
 export const findInABI = function (name: string, abi: ABIDef) {

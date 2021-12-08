@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator"
+import { Component, Vue } from "vue-property-decorator"
 import { ConversionEvent, decodedReturn, InitStatus } from '@/types'
 import {eventOfEnergyStation, extractValueFromDecoded, fromWeiToDisplayValue} from '../contracts'
 import { BigNumber } from 'bignumber.js'
@@ -49,7 +49,7 @@ export default class ConversionRecords extends Vue {
     }
 
     getLastConversion = async function(){
-        let logs = await eventOfEnergyStation('Conversion')!.filter([]).order('desc').apply(0, 5)
+        let logs = await eventOfEnergyStation('Conversion', window._connex.thor).filter([]).order('desc').apply(0, 5)
         let conversions: Array<ConversionEvent> = []
         for (let log of logs) {
             let item: ConversionEvent = {
@@ -87,3 +87,4 @@ export default class ConversionRecords extends Vue {
 <style>
 
 </style>
+n

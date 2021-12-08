@@ -51,7 +51,7 @@
     </div>
 </template>
 <script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator"
+import { Component, Vue } from "vue-property-decorator"
 import debounce from 'lodash.debounce'
 import { BigNumber } from "bignumber.js"
 import {
@@ -59,9 +59,7 @@ import {
     extractValueFromDecoded,
     fromWeiToDisplayValue
 } from "../contracts"
-import {ConversionType, ConversionStatus} from '../types'
-
-const MIN_PRICE_LOSS = 2
+import {ConversionType} from '../types'
 
 @Component
 export default class ConvertCards extends Vue {
@@ -80,7 +78,7 @@ export default class ConvertCards extends Vue {
             this.convertedVTHO = '0'
             return
         }
-        methodOfEnergyStation('getEnergyReturn')!.call(new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)).then(VMOutPut => {
+        methodOfEnergyStation('getEnergyReturn', window._connex.thor).call(new BigNumber(this.VET2VTHO).multipliedBy(1e18).dp(0).toString(10)).then(VMOutPut => {
             this.calcedVTHO  = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire')))
             this.convertedVTHO = fromWeiToDisplayValue(this.calcedVTHO)
         })
@@ -90,7 +88,7 @@ export default class ConvertCards extends Vue {
             this.convertedVET = '0'
             return
         }
-        methodOfEnergyStation('getVETReturn')!.call(new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)).then(VMOutPut => {
+        methodOfEnergyStation('getVETReturn', window._connex.thor).call(new BigNumber(this.VTHO2VET).multipliedBy(1e18).dp(0).toString(10)).then(VMOutPut => {
             this.calcedVET  = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire')))
             this.convertedVET = fromWeiToDisplayValue(this.calcedVET)
         })

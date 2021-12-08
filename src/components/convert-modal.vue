@@ -217,10 +217,10 @@ export default class ConvertModal extends Vue {
 
             const connex = window._connex
             if(this.conversionType === ConversionType.ToVTHO){
-                const VMOutPut = await methodOfEnergyStation('getEnergyReturn')!.call(this.fromTokenValue)
+                const VMOutPut = await methodOfEnergyStation('getEnergyReturn', connex.thor).call(this.fromTokenValue)
                 this.toTokenValue = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire'))).toString(10)
             }else{
-                const VMOutPut = await methodOfEnergyStation('getVETReturn')!.call(this.fromTokenValue)
+                const VMOutPut = await methodOfEnergyStation('getVETReturn', connex.thor).call(this.fromTokenValue)
                 this.toTokenValue = new BigNumber((extractValueFromDecoded(VMOutPut ,'canAcquire'))).toString(10)
             }
             this.getPriceLimit() 
@@ -247,6 +247,7 @@ export default class ConvertModal extends Vue {
         if(this.conversionStatus === ConversionStatus.Initiated){
             this.$emit('update:conversionStatus', ConversionStatus.Processing)
             ;(async () => {
+                const connex = window._connex
 
                 let signResult
                 let signer: string|null =null
@@ -259,8 +260,8 @@ export default class ConvertModal extends Vue {
                 if(this.conversionType === ConversionType.ToVTHO){
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
-                    let clause = methodOfEnergyStation('convertForEnergy')!.value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
-                    const signing = window._connex.vendor
+                    let clause = methodOfEnergyStation('convertForEnergy', connex.thor).value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
+                    const signing = connex.vendor
                         .sign("tx", [{...clause, comment: `Calling convert to VTHO function`}])
                         .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`)
                         .link(linkUrl)
@@ -272,15 +273,15 @@ export default class ConvertModal extends Vue {
                     const convertedVET= new BigNumber(this.toTokenValue)
                     let minReturn = convertedVET.dividedBy(this.priceLoss/100+1)
 
-                    let convertClause = methodOfEnergyStation('convertForVET')!.asClause(amount.dp(0).toString(10), minReturn.dp(0).toString(10))
-                    let approveClause = methodOfEnergy('approve')!.asClause(EnergyStationAddress, amount.toString(10))
+                    let convertClause = methodOfEnergyStation('convertForVET', connex.thor).asClause(amount.dp(0).toString(10), minReturn.dp(0).toString(10))
+                    let approveClause = methodOfEnergy('approve', connex.thor).asClause(EnergyStationAddress, amount.toString(10))
 
                     let clauses = []
                     if(!this.noApprove){
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    const signing = window._connex.vendor
+                    const signing = connex.vendor
                         .sign("tx", clauses)
                         .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`)
                         .link(linkUrl)
@@ -324,7 +325,7 @@ export default class ConvertModal extends Vue {
             return
         }
         let allower = this.sharedStore.linkedAddr
-        let ret = await methodOfEnergy('allowance')!.call(allower, EnergyStationAddress)
+        let ret = await methodOfEnergy('allowance', window._connex.thor).call(allower, EnergyStationAddress)
         const remaining  =  extractValueFromDecoded(ret, 'remaining')
         if(new BigNumber(remaining).isGreaterThanOrEqualTo(this.fromTokenValue)){
             this.showNoApproveOption = true

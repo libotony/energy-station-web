@@ -31,13 +31,14 @@ export default class BasicInfo extends Vue {
     }
 
     async getInitialInfo(){
-        let ret = await methodOfEnergyStation('vetVirtualBalance')!.call()
+        const connex = window._connex
+        let ret = await methodOfEnergyStation('vetVirtualBalance', connex.thor).call()
         this.basicInfo['VET Supply'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
-        ret = await methodOfEnergyStation('energyVirtualBalance')!.call()        
+        ret = await methodOfEnergyStation('energyVirtualBalance', connex.thor).call()        
         this.basicInfo['VTHO Supply'] = fromWeiToDisplayValue(extractValueFromDecoded(ret, '0'))
-        ret = await methodOfEnergyStation('conversionFee')!.call()
+        ret = await methodOfEnergyStation('conversionFee', connex.thor).call()
         this.basicInfo['Fee Rate'] = extractValueFromDecoded(ret, '0')/10000 + '%'
-        ret = await methodOfEnergyStation('owner')!.call()  
+        ret = await methodOfEnergyStation('owner', connex.thor).call()  
         this.basicInfo['Owner'] = extractValueFromDecoded(ret, '0')
     }
 
