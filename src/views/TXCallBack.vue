@@ -2,7 +2,7 @@
     <b-modal title="Convert Tokens" 
         header-bg-variant="primary" 
         header-text-variant="light"
-        @:hidden="onHidden"
+        @hidden="onHidden"
         ref='modal'
         no-close-on-backdrop
         no-close-on-esc
