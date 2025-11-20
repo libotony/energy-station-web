@@ -1,8 +1,5 @@
 # EnergyStation web
 
-[![Travis](https://travis-ci.org/libotony/energy-station-web.svg?branch=master)](https://travis-ci.org/libotony/energy-station-web)
-
-
 Web page works with energy station contracts
 
 ## Contracts and detail

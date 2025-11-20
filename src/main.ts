@@ -22,7 +22,7 @@ declare global {
 
 Object.defineProperty(window, '_connex', {
     value: new Connex({
-        node: 'https://sync-testnet.veblocks.net',
+        node: 'https://testnet.vechain.org',
         network: 'test'
     }),
     writable: false
