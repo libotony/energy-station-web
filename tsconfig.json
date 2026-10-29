@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "module": "esnext",
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -15,7 +15,7 @@
     "types": [
       "webpack-env",
       "node",
-      "@vechain/connex"
+      "@vechain/connex-types"
     ],
     "paths": {
       "@/*": [
@@ -27,7 +27,9 @@
       "dom",
       "dom.iterable",
       "scripthost"
-    ]
+    ],
+    "skipLibCheck": true,
+    "useDefineForClassFields": false
   },
   "include": [
     "src/**/*.ts",
