@@ -104,6 +104,8 @@ import {
 } from "../contracts"
 import {ConversionType, ConversionStatus} from '../types'
 import { store } from '../store'
+import { walletService } from '../wallet'
+import { WalletClause } from '../wallet/service'
 
 const MIN_PRICE_LOSS = 1
 
@@ -249,25 +251,17 @@ export default class ConvertModal extends Vue {
             ;(async () => {
                 const connex = window._connex
 
-                let signResult
-                let signer: string|null =null
+                const signer = this.sharedStore.linkedAddr
+                const clauses: WalletClause[] = []
                 const linkUrl = location.origin+process.env.BASE_URL+'#/tx-callback/{txid}'
 
-                if(this.sharedStore.linkedAddr){
-                    signer = this.sharedStore.linkedAddr
-                }
+                await this.checkApproval()
 
                 if(this.conversionType === ConversionType.ToVTHO){
                     const convertedEnergy = new BigNumber(this.toTokenValue)
                     let minReturn = convertedEnergy.dividedBy(this.priceLoss/100+1)
                     let clause = methodOfEnergyStation('convertForEnergy', connex.thor).value("0x" +new BigNumber(this.fromTokenValue).dp(0).toString(16)).asClause(minReturn.dp(0).toString(10))
-                    const signing = connex.vendor
-                        .sign("tx", [{...clause, comment: `Calling convert to VTHO function`}])
-                        .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VET to VTHO`)
-                        .link(linkUrl)
-                    if(signer) signing.signer(signer)
-                    
-                    signResult = await signing.request()
+                    clauses.push({...clause, comment: 'Calling convert to VTHO function'})
                 }else{
                     const amount = new BigNumber(this.fromTokenValue)
                     const convertedVET= new BigNumber(this.toTokenValue)
@@ -276,19 +270,17 @@ export default class ConvertModal extends Vue {
                     let convertClause = methodOfEnergyStation('convertForVET', connex.thor).asClause(amount.dp(0).toString(10), minReturn.dp(0).toString(10))
                     let approveClause = methodOfEnergy('approve', connex.thor).asClause(EnergyStationAddress, amount.toString(10))
 
-                    let clauses = []
-                    if(!this.noApprove){
+                    if(!this.noApprove || !this.showNoApproveOption){
                         clauses.push({...approveClause,comment:`Approve EnergyStation to spent ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO`})
                     }
                     clauses.push({...convertClause, comment:'Calling convert to VET function'})
-                    const signing = connex.vendor
-                        .sign("tx", clauses)
-                        .comment(`Converting ${fromWeiToDisplayValue(this.fromTokenValue)} VTHO to VET`)
-                        .link(linkUrl)
-                    if(signer) signing.signer(signer)
-
-                    signResult = await signing.request()
                 }
+                const signResult = await walletService.sendTransaction(
+                    clauses,
+                    `Converting ${fromWeiToDisplayValue(this.fromTokenValue)} ${this.fromTokenType} to ${this.toTokenType}`,
+                    linkUrl,
+                    signer
+                )
                 this.txid = signResult.txid
                 if(this.checkConfirmation){
                     this.$emit('update:conversionStatus', ConversionStatus.Confirming)
@@ -297,7 +289,7 @@ export default class ConvertModal extends Vue {
                 }
             })().catch(e => {
                 console.log(e)
-                this.actionShowError('Sign transaction failed!')
+                this.actionShowError(e instanceof Error ? e.message : 'You need to approve the transaction in your wallet and try again.')
             })
         }else if(this.conversionStatus === ConversionStatus.Success || this.conversionStatus === ConversionStatus.Error){
             (<Element & {hide: Function}>this.$refs.modal).hide()
@@ -318,20 +310,29 @@ export default class ConvertModal extends Vue {
         this.message = msg
     }
     async checkApproval(){
-        if(this.conversionType !== ConversionType.ToVET){
+        this.showNoApproveOption = false
+        const allower = this.sharedStore.linkedAddr
+        if(this.conversionType !== ConversionType.ToVET || !allower){
             return
         }
-        if(!this.sharedStore.linkedAddr){
+        const ret = await methodOfEnergy('allowance', window._connex.thor).call(allower, EnergyStationAddress)
+        if(this.sharedStore.linkedAddr !== allower){
             return
         }
-        let allower = this.sharedStore.linkedAddr
-        let ret = await methodOfEnergy('allowance', window._connex.thor).call(allower, EnergyStationAddress)
-        const remaining  =  extractValueFromDecoded(ret, 'remaining')
-        if(new BigNumber(remaining).isGreaterThanOrEqualTo(this.fromTokenValue)){
-            this.showNoApproveOption = true
-        }else{
+        const remaining = extractValueFromDecoded(ret, 'remaining')
+        this.showNoApproveOption = new BigNumber(remaining).isGreaterThanOrEqualTo(this.fromTokenValue)
+    }
+
+    @Watch('sharedStore.linkedAddr')
+    onWalletChanged(){
+        this.noApprove = false
+        this.showNoApproveOption = false
+        if(this.conversionStatus !== ConversionStatus.Initiated){
+            return
+        }
+        this.checkApproval().catch(() => {
             this.showNoApproveOption = false
-        }
+        })
     }
     confirmThreeEvent(txReverted: boolean){
         this.confirmThree=true

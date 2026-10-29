@@ -3,7 +3,6 @@ import EnergyStationABI from './energy-station.json'
 import EnergyABI from './energy.json'
 import { ABIDef, decodedReturn } from '../types'
 import {BigNumber} from 'bignumber.js'
-import { Connex } from '@vechain/connex'
 
 export const EnergyStationAddress = '0xD015D91B42BEd5FeaF242082b11B83B431abBf4f'
 export const EnergyAddress = '0x0000000000000000000000000000456E65726779'

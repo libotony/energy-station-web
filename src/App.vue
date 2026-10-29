@@ -9,9 +9,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator"
-import { picasso } from '@vechain/picasso'
 import { EventBus } from './eventbus'
-import { store } from './store'
 import NavBar from './components/nav-bar.vue'
 
 @Component({
@@ -23,15 +21,6 @@ import NavBar from './components/nav-bar.vue'
 export default class App extends Vue {
 
     created(){
-        const data = sessionStorage.getItem('linked-addr');
-        if(!!data){
-            if(/^0x[0-9a-fA-F]{40}$/i.test(data)){
-                store.setLinkedAddrAction(data)
-            }else{
-                sessionStorage.removeItem('linked-addr');
-            }
-        }
-
         ;(async()=>{
             const connex = window._connex
             const ticker = connex.thor.ticker()

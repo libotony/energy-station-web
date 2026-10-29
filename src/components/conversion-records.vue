@@ -1,7 +1,7 @@
 <template>
     <b-row class="mb-3">
         <b-card bg-variant="light" class="w-75 mx-auto" title="CONVERSION RECORD">
-            <b-table striped boarderd outlined small responsive :items="conversions" :fields="tableFields"></b-table>
+            <b-table striped bordered outlined small responsive primary-key="id" :items="conversions" :fields="tableFields"></b-table>
         </b-card>
     </b-row>
 </template>
@@ -15,26 +15,14 @@ import { EventBus } from '../eventbus'
 
 @Component
 export default class ConversionRecords extends Vue {
-    tableFields = {
-        conversion:{
-            label: 'Conversion'
-        },
-        amount:{
-            label: 'Amount'
-        },
-        converted:{
-            label: 'Received'
-        },
-        rate:{
-            label: 'VTHO/VET'
-        },
-        conversionTime:{
-            label: 'Time'
-        },
-        fee:{
-            label: 'Fee'
-        }
-    }
+    tableFields = [
+        { key: 'conversion', label: 'Conversion' },
+        { key: 'amount', label: 'Amount' },
+        { key: 'converted', label: 'Received' },
+        { key: 'rate', label: 'VTHO/VET' },
+        { key: 'conversionTime', label: 'Time' },
+        { key: 'fee', label: 'Fee' }
+    ]
     conversions: Array<ConversionEvent> = []
 
     created(){
@@ -87,4 +75,3 @@ export default class ConversionRecords extends Vue {
 <style>
 
 </style>
-n
