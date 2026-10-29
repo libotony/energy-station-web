@@ -30,7 +30,7 @@ export function createWalletService(onAddressChange: (address: string) => void) 
         },
         async sendTransaction(clauses: WalletClause[], comment: string, link: string, expectedAddress: string) {
             if (!session || !expectedAddress) {
-                throw new Error('You need to connect your wallet using Link Account before converting.')
+                throw new Error('You need to connect your wallet before converting.')
             }
             if (session.address.toLowerCase() !== expectedAddress.toLowerCase()) {
                 throw new Error('Your wallet changed. You need to review the conversion and try again.')

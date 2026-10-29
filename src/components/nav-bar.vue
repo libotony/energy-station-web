@@ -1,7 +1,7 @@
 <template>
     <b-navbar type="dark" variant="primary" toggleable>
         <b-navbar-brand to="/">EnergyStation</b-navbar-brand>
-        <div ref="wallet" class="mr-auto" />
+        <div id="energy-station-wallet" ref="wallet" class="mr-auto" />
     </b-navbar>
 </template>
 

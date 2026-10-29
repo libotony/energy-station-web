@@ -1,0 +1,10 @@
+/* Kit disables its global reset. Reset host defaults only inside the Kit root;
+   Kit's own component classes keep control of the button's appearance. */
+:where(#energy-station-wallet) button {
+    border-width: 0;
+    border-style: solid;
+}
+
+:where(#energy-station-wallet) p {
+    margin: 0;
+}

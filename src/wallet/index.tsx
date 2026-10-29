@@ -9,6 +9,7 @@ import {
 import { store } from '../store'
 import { walletNetwork } from './network'
 import { createWalletService } from './service'
+import './styles.css'
 
 export const walletService = createWalletService(address => store.setLinkedAddrAction(address))
 
@@ -23,7 +24,7 @@ function WalletControl() {
 
     useLayoutEffect(() => () => walletService.update(), [])
 
-    return <WalletButton label="Link Account" buttonStyle={{ size: 'sm' }} />
+    return <WalletButton />
 }
 
 export function mountWallet(element: HTMLElement) {
